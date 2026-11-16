@@ -14,10 +14,10 @@ and 1M (5° angle of attack), plus a NACA0012 at `Re_c` = 400k.
 | phase | state |
 |---|---|
 | 0. Loader, boundary-layer quantities, reproduction of the paper | **done** |
-| 1. Baselines (classical correlations, local-feature GBM) | next |
-| 2. History-aware model with a learned memory kernel + SHAP | planned |
+| 1. Baselines, memory kernel, leakage-safe validation | **done** |
+| 2. Jointly learned kernel + SHAP decomposition into β / history / Re | next |
 | 3. Symbolic regression to a compact law | planned |
-| 4. Generalisation: leave-one-Re-out, cross-geometry, APG → FPG | planned |
+| 4. Generalisation: cross-geometry, APG → FPG, uncertainty | planned |
 
 ## Phase 0 result: the published results come back out of the published files
 
@@ -89,6 +89,66 @@ between them.
 
 Both findings are documented in full, with the evidence, in
 [`docs/DATA_NOTES.md`](docs/DATA_NOTES.md).
+
+## Phase 1 result: the boundary layer remembers, and how far depends on where you look
+
+![Memory-length scan](paper/figures/fig_memory_scan.png)
+
+Each station is described by local variables (β, Re_τ, u_p/U_e, dβ/dx) and
+optionally by a **history** variable: β convolved with a decaying kernel
+whose memory length ℓ is swept. Scored by **leave-one-Reynolds-number-out**
+validation — the model must predict a Reynolds number it has never seen —
+with W1 excluded as not a well-behaved TBL.
+
+Adding history reduces error on every target:
+
+| target | local only | + history | reduction |
+|---|---|---|---|
+| `Cf` | 3.7% | 2.3% | 36% |
+| `H` | 1.2% | 0.5% | 59% |
+| `Ue_plus` | 1.9% | 1.2% | 37% |
+| `uu_outer` | 8.6% | 7.5% | 13% |
+| `uv_outer` | 4.5% | 3.7% | 18% |
+| `Pk_outer` | 9.8% | 8.2% | 16% |
+
+*(median relative error, ridge in log space; the same comparison in a
+gradient-boosting family gives 0–72% reductions)*
+
+**Controlled against a placebo.** Three random features of the same
+dimensionality change the error by −10% to +16% — mostly making it worse. The
+history gain is not just extra flexibility.
+
+**The memory length separates by region.** Sweeping ℓ and taking the
+optimum per target:
+
+| region | best ℓ / δ₉₉ |
+|---|---|
+| wall (`Cf`) | **0.20** |
+| integral (`H`, `Ue_plus`) | **0.20 – 0.27** |
+| outer (`uu`, `uv`, `Pk` at 0.2δ₉₉) | **5.7 – 10.0** |
+
+An order of magnitude apart. This is Clauser's remark that the outer layer
+has a long memory, measured rather than asserted: wall quantities are set by
+roughly the local pressure gradient, while outer-region statistics integrate
+it over several boundary-layer thicknesses of upstream history.
+
+```bash
+python scripts/phase1_baselines.py   # the model ladder + placebo control
+python scripts/memory_scan.py        # the memory-length sweep
+```
+
+Full tables: [`paper/phase1_results.md`](paper/phase1_results.md),
+[`paper/memory_scan.md`](paper/memory_scan.md).
+
+### A methodological note worth repeating
+
+Under leave-one-Reynolds-number-out, **ridge regression in log space beats
+gradient boosting on every target** — often by a factor of three. With 120
+stations across three cases, and a held-out fold that requires
+*extrapolating* in Re_τ rather than interpolating, trees cannot leave the
+range they were trained on. The small-data regime rewards the model that can
+express a power law, which is also the form Phase 3 will try to recover
+symbolically.
 
 ## Install
 
