@@ -16,7 +16,8 @@ and 1M (5° angle of attack), plus a NACA0012 at `Re_c` = 400k.
 | 0. Loader, boundary-layer quantities, reproduction of the paper | **done** |
 | 1. Baselines, memory kernel, leakage-safe validation | **done** |
 | 2. Fitted memory length + exact decomposition into β / history / Re | **done** |
-| 3. Symbolic regression; cross-geometry and APG → FPG generalisation | next |
+| 3. Cross-geometry generalisation + symbolic search | **done** |
+| 4. Write-up; more cases if the Mallor (2024) database becomes available | next |
 
 ## Phase 0 result: the published results come back out of the published files
 
@@ -215,6 +216,82 @@ reported that way. The decomposition is built from the *product* a₂·log(β̄/
 in which the trade-off cancels — which is why the split above is stable while
 its ingredients individually are not. Both facts are pinned in
 [`tests/test_memory_model.py`](tests/test_memory_model.py).
+
+## Phase 3 result: it transfers to another airfoil, and history multiplies with β
+
+![Generalisation](paper/figures/fig_generalisation.png)
+
+Every earlier conclusion rested on three Reynolds numbers of one wing. Three
+tests, in increasing order of what they ask:
+
+| target | A: hold out Re_c=400k | B: extrapolate β, 2.5 → 49 | **C: NACA4412 → NACA0012** |
+|---|---|---|---|
+| `H` | 0.57% | 2.99% | **2.54%** |
+| `Cf` | 2.03% | 19.96% | **7.42%** |
+| `Ue_plus` | 1.01% | 8.70% | **3.93%** |
+| `uu_outer` | 4.72% | 20.96% | **9.81%** |
+| `uv_outer` | 2.59% | 13.54% | **4.24%** |
+| `Pk_outer` | 5.11% | 34.98% | **17.72%** |
+
+Test **C** is the real one: fitted on a cambered section at 5° with β
+reaching 46, then asked about a *symmetric* section at 0° where β only
+reaches 3.3. Nothing about that geometry is in the training distribution
+except the physics the law is meant to have captured, and most quantities
+come back within 2.5–10%.
+
+Test **B** is the honest limitation: extrapolating the power law twenty-fold
+beyond its fitted β range costs 20–35% on `Cf`, `uu` and `Pk`. The law
+should be used inside its calibration range.
+
+**A fourth test is impossible, and the reason is a result.** The pressure
+side is a *favourable* gradient with β < 0 at 88–95% of stations, and a law
+containing β^a has no real value there. This is an adverse-pressure-gradient
+law; it does not continue through β = 0.
+
+### Does a richer expression beat the power law?
+
+![Pareto front](paper/figures/fig_pareto.png)
+
+An exhaustive search over all 255 expressions of up to four terms from a
+nine-term library, at four memory lengths — exhaustive rather than genetic,
+so there is no seed, population size or stopping rule to defend, and the
+result is optimal within the space.
+
+Two findings, one encouraging and one cautionary.
+
+**One term is chosen for every single target: `log β · log m`.** Out of nine
+candidates and six independent selections. Its meaning is that the exponent
+on β depends on how far the upstream history departs from the local value —
+**history and local pressure gradient are not separable factors, they
+multiply**. The Phase 2 law treats them as independent, which is why a fourth
+term helps. Runners-up are `log²β` (5/6, curvature in β) and `log β · log R`
+(4/6, a Reynolds-dependent β exponent).
+
+**Selection optimism is 4.4× median.** The leave-one-Re-out error used to
+pick an expression understates its true held-out error by a factor of 3–6.
+Scored honestly on the NACA0012, the searched four-term expressions beat the
+three-term power law on only 4 of 6 targets:
+
+| target | searched, selection | searched, NACA0012 | power law, NACA0012 |
+|---|---|---|---|
+| `H` | 0.31% | **1.77%** | 2.18% |
+| `Cf` | 0.97% | **4.24%** | 7.92% |
+| `Ue_plus` | 0.49% | **2.19%** | 4.21% |
+| `uv_outer` | 1.50% | **0.86%** | 4.26% |
+| `uu_outer` | 3.44% | 11.09% | **9.74%** |
+| `Pk_outer` | 3.67% | 21.77% | **18.47%** |
+
+Anyone running symbolic regression on a turbulence dataset this size should
+expect that gap. The Pareto curves also show a clear elbow at three terms:
+the first three buy an order of magnitude, the fourth buys very little.
+
+```bash
+python scripts/phase3_generalisation.py
+python scripts/phase3_symbolic.py
+```
+
+Full tables: [`paper/phase3_generalisation.md`](paper/phase3_generalisation.md),
+[`paper/phase3_symbolic.md`](paper/phase3_symbolic.md).
 
 ### A methodological note worth repeating
 

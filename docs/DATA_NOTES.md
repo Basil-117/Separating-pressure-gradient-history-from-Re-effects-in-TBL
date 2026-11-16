@@ -197,3 +197,36 @@ outer-region quantities `5.7-10 delta99`. That scan selected `ell` on the
 test set and used a collinear feature set. With the length fitted inside each
 training fold and the ratio parameterisation, every target lands at
 `ell ~ 0.4-0.6 delta99`. There is no order-of-magnitude separation by region.
+
+## 9. Phase 3: what generalises and what does not
+
+**The law transfers across geometry.** Fitted on the NACA4412 at 5 deg and
+applied unchanged to the NACA0012 at 0 deg -- a different section, a
+different angle of attack, and a pressure gradient reaching beta = 3.3
+rather than 46 -- the median error is 2.5-9.8% on five of six targets
+(17.7% on TKE production, which is the hardest quantity everywhere).
+
+**It does not extrapolate far in beta.** Trained on `x/c <= 0.70`
+(beta <= 2.5) and asked about `x/c > 0.70` (beta up to 49), the error rises
+to 20-35% on Cf, uu and Pk. Use the law inside its calibration range.
+
+**It has no favourable-pressure-gradient limit.** The pressure side has
+beta < 0 at 88-95% of stations in the analysis window, and `beta^a` is not
+real there. Any extension to FPG needs a different functional form, not a
+refit.
+
+**Local pressure gradient and history multiply.** An exhaustive search over
+255 expressions from a nine-term library chose the interaction term
+`log(beta) * log(beta_bar/beta)` for all six targets -- out of nine
+candidates, in six independent selections. The exponent on beta therefore
+depends on how far the upstream history departs from the local value, so
+the two are not separable factors as the Phase 2 power law assumes. Next
+most frequent: `log^2(beta)` (5/6) and `log(beta) * log(Re_tau)` (4/6).
+
+**Selection optimism is large.** Leave-one-Reynolds-number-out error, used
+to pick an expression out of ~1000 candidates, understates the true held-out
+error by a median factor of **4.4** (range 3.2-5.9). Scored honestly on the
+unseen NACA0012, the searched four-term expressions beat the three-term
+power law on only four of six targets. Any symbolic-regression result on a
+dataset this size should be reported with a genuinely held-out score, not
+with the criterion it was selected on.

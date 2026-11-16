@@ -1,0 +1,25 @@
+target,k,err,ell,terms
+H,1,0.042387818765121224,1.0,m - 1
+H,2,0.018313323659617492,1.0,log^2 R + log m log R
+H,3,0.0047882884542886864,0.2,log^2 b + log^2 R + log b log R
+H,4,0.00313752376820927,1.0,log R + log b log R + log m log R + log b log m
+Cf,1,0.14364249566216578,3.0,log m log R
+Cf,2,0.02965580587178778,0.45,log m + log R
+Cf,3,0.011971524592095838,0.2,log^2 R + log b log R + log m log R
+Cf,4,0.009701397363205102,0.45,log^2 b + log^2 R + log b log R + log b log m
+Ue_plus,1,0.07360487005534334,0.2,log^2 b
+Ue_plus,2,0.015166081968283281,0.45,log m + log R
+Ue_plus,3,0.005985691764584259,0.2,log^2 R + log b log R + log m log R
+Ue_plus,4,0.00485238596920768,0.45,log^2 b + log^2 R + log b log R + log b log m
+uu_outer,1,0.08119942364061822,1.0,log m
+uu_outer,2,0.05147917901422039,1.0,log m + log^2 R
+uu_outer,3,0.03924592306769675,1.0,log m + log^2 b + log^2 R
+uu_outer,4,0.034360421637254744,3.0,log m + log R + log^2 b + log b log m
+uv_outer,1,0.07741085516241863,0.45,m - 1
+uv_outer,2,0.02994007783714335,0.45,log b + log m log R
+uv_outer,3,0.01859535911027875,0.2,log b + log m + m - 1
+uv_outer,4,0.015032855585711886,3.0,log b + log^2 b + log b log R + log b log m
+Pk_outer,1,0.4715465623496219,1.0,m - 1
+Pk_outer,2,0.09892207236691627,0.45,log R + log m log R
+Pk_outer,3,0.04911213502682118,3.0,log R + log b log m + m - 1
+Pk_outer,4,0.03670549559854892,1.0,log R + log^2 b + log m log R + log b log m
