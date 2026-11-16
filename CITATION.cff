@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+title: "wing-memory: history-aware modelling of wing turbulent boundary layers"
+message: "If you use this software, please cite it and the underlying WING database."
+type: software
+authors:
+  - family-names: "<your surname>"
+    given-names: "<your given name>"
+license: MIT
+references:
+  - type: article
+    authors:
+      - family-names: Vinuesa
+        given-names: R.
+      - family-names: Negi
+        given-names: P. S.
+      - family-names: Atzori
+        given-names: M.
+      - family-names: Hanifi
+        given-names: A.
+      - family-names: Henningson
+        given-names: D. S.
+      - family-names: Schlatter
+        given-names: P.
+    title: "Turbulent boundary layers around wing sections up to Re_c = 1,000,000"
+    journal: "International Journal of Heat and Fluid Flow"
+    volume: 72
+    start: 86
+    end: 99
+    year: 2018
+    doi: 10.1016/j.ijheatfluidflow.2018.04.017
+  - type: article
+    authors:
+      - family-names: Tanarro
+        given-names: A.
+      - family-names: Vinuesa
+        given-names: R.
+      - family-names: Schlatter
+        given-names: P.
+    title: "Effect of adverse pressure gradients on turbulent wing boundary layers"
+    journal: "Journal of Fluid Mechanics"
+    volume: 883
+    year: 2020
+    doi: 10.1017/jfm.2019.838
