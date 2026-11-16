@@ -167,3 +167,33 @@ Files, after extraction:
 |---|---|---|
 | `naca4412.mat` | `a019ac85b30bbd428288f3456d41d864` | 8 cases, 50 stations each |
 | `naca0012.mat` | `803540516df1503eb5b041e1c94fa95b` | 1 case, 50 stations |
+
+## 8. Modelling notes from Phase 2
+
+Two findings about the *model* rather than the data, recorded here because
+they govern how its numbers should be read.
+
+**The memory length is weakly identified.** The fitted law
+`y = C beta^a1 (beta_bar/beta)^a2 Re_tau^a3` recovers all four parameters to
+four significant figures from noiseless synthetic data. Adding 0.2% noise in
+log space -- well below the scatter in the LES statistics -- moves the fitted
+`ell` by 15-27% and `a2` by up to 65%, because a shorter memory shrinks
+`log(beta_bar/beta)` and a larger `|a2|` compensates almost exactly. Quote
+`ell` to a factor of ~1.3, never to two digits.
+
+The decomposition uses the product `a2 * log(beta_bar/beta)`, in which the
+trade-off cancels: forcing `ell` to half or double its fitted value moves the
+pressure-gradient share by at most 7 points, usually 1-3.
+
+**Do not parameterise with `beta` and `beta_bar` as separate powers.** They
+are nearly collinear -- at short memory `beta_bar -> beta` -- and the fit
+returns equal-and-opposite exponents around +/- 7 that are unstable and
+meaningless. Since `beta^a1 beta_bar^a2 = beta^(a1+a2) (beta_bar/beta)^a2`,
+the ratio form is the same model class with separable terms.
+
+**Correction to an earlier Phase 1 claim.** A scan of `ell` against held-out
+error appeared to show wall quantities preferring `ell ~ 0.2 delta99` and
+outer-region quantities `5.7-10 delta99`. That scan selected `ell` on the
+test set and used a collinear feature set. With the length fitted inside each
+training fold and the ratio parameterisation, every target lands at
+`ell ~ 0.4-0.6 delta99`. There is no order-of-magnitude separation by region.

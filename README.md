@@ -15,9 +15,8 @@ and 1M (5° angle of attack), plus a NACA0012 at `Re_c` = 400k.
 |---|---|
 | 0. Loader, boundary-layer quantities, reproduction of the paper | **done** |
 | 1. Baselines, memory kernel, leakage-safe validation | **done** |
-| 2. Jointly learned kernel + SHAP decomposition into β / history / Re | next |
-| 3. Symbolic regression to a compact law | planned |
-| 4. Generalisation: cross-geometry, APG → FPG, uncertainty | planned |
+| 2. Fitted memory length + exact decomposition into β / history / Re | **done** |
+| 3. Symbolic regression; cross-geometry and APG → FPG generalisation | next |
 
 ## Phase 0 result: the published results come back out of the published files
 
@@ -118,19 +117,16 @@ gradient-boosting family gives 0–72% reductions)*
 dimensionality change the error by −10% to +16% — mostly making it worse. The
 history gain is not just extra flexibility.
 
-**The memory length separates by region.** Sweeping ℓ and taking the
-optimum per target:
-
-| region | best ℓ / δ₉₉ |
-|---|---|
-| wall (`Cf`) | **0.20** |
-| integral (`H`, `Ue_plus`) | **0.20 – 0.27** |
-| outer (`uu`, `uv`, `Pk` at 0.2δ₉₉) | **5.7 – 10.0** |
-
-An order of magnitude apart. This is Clauser's remark that the outer layer
-has a long memory, measured rather than asserted: wall quantities are set by
-roughly the local pressure gradient, while outer-region statistics integrate
-it over several boundary-layer thicknesses of upstream history.
+**A claim from this scan that did *not* survive Phase 2.** Sweeping ℓ and
+taking the per-target optimum appeared to separate the regions by an order
+of magnitude — ℓ ≈ 0.2δ₉₉ for wall quantities against 5.7–10δ₉₉ for
+outer-region ones — which would have been Clauser's long-memory remark
+turned into a number. It does not hold up. That scan chose ℓ by *held-out*
+error, which is selection on the test set, and it used a collinear feature
+set. Repeating it with the memory length fitted inside each training fold
+puts every target at ℓ ≈ 0.4–0.6δ₉₉ (below). The scan figure is kept because
+the curves are genuinely informative about how much history matters; its
+argmin is not.
 
 ```bash
 python scripts/phase1_baselines.py   # the model ladder + placebo control
@@ -139,6 +135,86 @@ python scripts/memory_scan.py        # the memory-length sweep
 
 Full tables: [`paper/phase1_results.md`](paper/phase1_results.md),
 [`paper/memory_scan.md`](paper/memory_scan.md).
+
+## Phase 2 result: most of the "Reynolds-number effect" in the outer region is the β mismatch
+
+![Decomposition](paper/figures/fig_decomposition.png)
+
+Phase 2 fits the smallest law that can answer the question,
+
+> **y = C · β^a₁ · (β̄/β)^a₂ · Re_τ^a₃**
+
+with the memory length ℓ of the kernel behind β̄ **fitted inside each
+training fold**, then scored on a held-out Reynolds number. Three terms, one
+length — about as much as ~40 stations per case can support.
+
+| target | ℓ / δ₉₉ (fold range) | held-out error |
+|---|---|---|
+| `H` | 0.59 (0.57 – 0.70) | 1.15% |
+| `Cf` | 0.43 (0.41 – 0.48) | 2.36% |
+| `Ue_plus` | 0.43 (0.41 – 0.48) | 1.20% |
+| `uu_outer` | 0.46 (0.46 – 0.60) | 9.24% |
+| `uv_outer` | 0.45 (0.41 – 0.52) | 3.82% |
+| `Pk_outer` | 0.47 (0.46 – 0.58) | 6.08% |
+
+The memory length is short and stable across folds for every target, and the
+inner objective is sharply peaked — error rises 10–24× as ℓ→0, where the
+history term switches off, and 5–10× by ℓ = 17δ₉₉. History matters a great
+deal; it just does not reach as far as Phase 1 suggested.
+
+### The decomposition
+
+Because the law is linear in log space, the difference between two cases at
+matched chordwise position splits **exactly**:
+
+```
+Δlog y  =  a₁ Δlog β  +  a₂ Δlog(β̄/β)  +  a₃ Δlog Re_τ
+           └──────── pressure gradient ────────┘   └─ Reynolds ─┘
+```
+
+Vinuesa et al. read that whole difference as a Reynolds-number effect, on
+the premise that β is matched. It is not. Splitting it:
+
+| target | pressure gradient | Reynolds number |
+|---|---|---|
+| `uv_outer` | **77%** | 23% |
+| `uu_outer` | **64%** | 36% |
+| `Cf` | 35% | **65%** |
+| `H` | 34% | **66%** |
+| `Ue_plus` | 35% | **65%** |
+| `Pk_outer` | 27% | **73%** |
+
+**For the outer-region Reynolds stresses, most of the apparent
+Reynolds-number trend is the residual β mismatch** — the quantities the paper
+leans on hardest for its conclusion that low-Re boundary layers are more
+sensitive to a pressure gradient. For the wall and integral quantities, and
+for TKE production, Reynolds number really does dominate and the original
+reading stands.
+
+Checked three ways: the shares move by ≤3 points when the comparison is
+`W4→W10` instead of `W2→W10`; by ≤7 points when ℓ is forced to half or
+double its fitted value; and the fitted law reproduces the observed change
+to within 2–10%.
+
+```bash
+python scripts/phase2_decomposition.py
+```
+
+Full tables: [`paper/phase2_results.md`](paper/phase2_results.md).
+
+### A limitation worth stating plainly
+
+The memory length ℓ and the history exponent a₂ **trade off against each
+other**: a shorter memory shrinks log(β̄/β), and a larger |a₂| compensates
+almost exactly. On synthetic data the fitter recovers both to four
+significant figures with no noise, but 0.2% noise in log space — far below
+the scatter in the LES statistics — moves ℓ by 15–27% and a₂ by up to 65%.
+
+So ℓ ≈ 0.5δ₉₉ is good to a factor of roughly 1.3, not to two digits, and is
+reported that way. The decomposition is built from the *product* a₂·log(β̄/β),
+in which the trade-off cancels — which is why the split above is stable while
+its ingredients individually are not. Both facts are pinned in
+[`tests/test_memory_model.py`](tests/test_memory_model.py).
 
 ### A methodological note worth repeating
 
