@@ -6,6 +6,7 @@ authors:
   - family-names: "<your surname>"
     given-names: "<your given name>"
 license: MIT
+repository-code: "https://github.com/Basil-117/wing-memory"
 references:
   - type: article
     authors:
