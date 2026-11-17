@@ -25,8 +25,8 @@
 \title{\bfseries Separating pressure-gradient history from Reynolds-number
 effects in turbulent wing boundary layers}
 
-\author[1]{\textit{Author Name}}
-\affil[1]{\textit{Affiliation}}
+\author[1]{Basil Mehmood}
+\affil[1]{Independent Researcher}
 \date{\today}
 
 \begin{document}
@@ -53,7 +53,7 @@ gradient, and the friction Reynolds number appear as separate factors, with
 the memory length fitted inside each training fold. The law predicts a
 held-out Reynolds number to $1.2$--$9.2\%$ and, being linear in logarithms,
 splits the difference between two cases exactly. For the outer-region
-Reynolds stresses---the quantities that carry the original argument---
+Reynolds stresses, the quantities that carry the original argument,
 $64$--$77\%$ of the apparent Reynolds-number trend is attributable to the
 residual $\beta$ mismatch; for the wall and integral quantities and for
 turbulent kinetic energy production, Reynolds number dominates and the
@@ -92,7 +92,7 @@ zero-pressure-gradient (ZPG) layer at matched $\Ret$. They reported that
 the ratios of edge velocity, shape factor, Reynolds stresses and outer-layer
 production all decrease with $\Rec$, and concluded that lower-Reynolds-number
 layers are more sensitive to a given pressure gradient, with two
-complementary mechanisms---one tied to Reynolds number, one to the APG---
+complementary mechanisms, one tied to Reynolds number and one to the APG,
 energising the outer region.
 
 That conclusion rests entirely on $\beta(x)$ being matched between the
@@ -142,8 +142,8 @@ published to two significant figures.
 
 \paragraph{Two caveats in reading the files.} Both are easy to get wrong and
 neither is stated in the distribution. First, the velocity scale behind every
-shipped integral quantity---$C_f$, $\mathrm{Re}_{\delta^*}$, $\Reth$,
-$\delta^*$ and $\theta$---is the \emph{maximum} tangential velocity of each
+shipped integral quantity ($C_f$, $\mathrm{Re}_{\delta^*}$, $\Reth$,
+$\delta^*$ and $\theta$) is the \emph{maximum} tangential velocity of each
 profile, not the \texttt{Ue} field stored alongside it. We verified this by
 inverting each quantity for the velocity it implies, obtaining agreement with
 $\max(U)$ to machine precision across all nine distributed cases. Using
@@ -232,14 +232,14 @@ separate term for each candidate cause. It is linear in logarithms, so
 Shapley attribution is exact and analytic rather than sampled, and the
 difference between two cases decomposes without approximation. And with
 roughly 40 usable stations per Reynolds number, three coefficients and one
-length is close to the most the data supports---consistent with our finding
+length is close to the most the data supports, which agrees with our finding
 that ridge regression in log space outperforms gradient boosting on every
 target under leave-one-Reynolds-number-out validation, because the held-out
 fold requires extrapolating in $\Ret$ rather than interpolating.
 
 The history term is deliberately the \emph{ratio} $\bbar/\beta$ rather than
 $\bbar$. Parameterised as separate powers of $\beta$ and $\bbar$, the two are
-nearly collinear---at short memory $\bbar \to \beta$---and the fit returns
+nearly collinear, since at short memory $\bbar \to \beta$, and the fit returns
 equal-and-opposite exponents of order $\pm 7$ that are unstable and
 uninterpretable. Since
 $\beta^{a_1}\bbar^{a_2} = \beta^{a_1+a_2}(\bbar/\beta)^{a_2}$, the ratio
@@ -267,7 +267,7 @@ separated.
 
 On synthetic data generated from Equation~\eqref{eq:law} the fitter recovers
 $\ell$ and all three exponents to four significant figures. Adding $0.2\%$
-noise in log space---well below the scatter in the LES statistics---moves the
+noise in log space, well below the scatter in the LES statistics, moves the
 fitted $\ell$ by $15$--$27\%$ and $a_2$ by up to $65\%$, because a shorter
 memory shrinks $\log(\bbar/\beta)$ and a larger $|a_2|$ compensates almost
 exactly. We therefore quote $\ell$ to a factor of order $1.3$ and never to two
@@ -386,8 +386,8 @@ the observed change to within $2$--$10\%$ (Figure~\ref{fig:decomp}, left).
 
 Table~\ref{tab:general} reports three tests of increasing severity.
 Interpolating in Reynolds number is easy ($0.6$--$5.1\%$). Extrapolating
-twenty-fold in $\beta$---trained on $x/c \le 0.70$ where
-$\beta \le 2.5$, evaluated where $\beta$ reaches $49$---costs $20$--$35\%$
+twenty-fold in $\beta$ (trained on $x/c \le 0.70$ where
+$\beta \le 2.5$, evaluated where $\beta$ reaches $49$) costs $20$--$35\%$
 on $C_f$, $\overline{u_t^2}^+$ and $P_k^+$; the law should be used within its
 calibration range. The cross-geometry test is the demanding one: fitted on a
 cambered section at $5^\circ$ and applied unchanged to a \emph{symmetric}
@@ -424,8 +424,8 @@ not a refit.
 \subsection{Is the three-term law the right complexity?}
 
 We searched exhaustively over all 255 expressions of up to four terms drawn
-from a nine-term library---powers of the three variables, their pairwise
-products in log space, and quadratic curvature---at four memory lengths.
+from a nine-term library: powers of the three variables, their pairwise
+products in log space, and quadratic curvature, at four memory lengths.
 Exhaustive rather than genetic search removes the seed, population size and
 stopping rule that would otherwise require justification, and is optimal
 within the space considered.
@@ -515,10 +515,12 @@ magnitude with more than one pressure-gradient history per geometry.
 The WING database is the property of its authors; the download links
 currently published are not operational, and the files used here were
 supplied on request. All analysis code, the reproduction of
-\citet{vinuesa2018}, and the scripts generating every figure and table in
-this paper are available at
-\url{https://github.com/Basil-117/wing-memory}, together with a documented
-audit of the database.
+\citet{vinuesa2018}, a documented audit of the database, and the scripts
+generating every figure and table in this paper are available at
+\begin{center}
+\footnotesize
+\url{https://github.com/Basil-117/Separating-pressure-gradient-history-from-Re-effects-in-TBL}
+\end{center}
 
 \section*{Acknowledgements}
 

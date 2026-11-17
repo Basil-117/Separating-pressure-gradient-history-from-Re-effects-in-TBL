@@ -3,10 +3,10 @@ title: "wing-memory: history-aware modelling of wing turbulent boundary layers"
 message: "If you use this software, please cite it and the underlying WING database."
 type: software
 authors:
-  - family-names: "<your surname>"
-    given-names: "<your given name>"
+  - family-names: "Mehmood"
+    given-names: "Basil"
 license: MIT
-repository-code: "https://github.com/Basil-117/wing-memory"
+repository-code: "https://github.com/Basil-117/Separating-pressure-gradient-history-from-Re-effects-in-TBL"
 references:
   - type: article
     authors:
