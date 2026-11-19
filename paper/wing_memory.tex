@@ -24,7 +24,7 @@
 in turbulent wing boundary layers}
 
 \author[1]{Basil Mehmood}
-\affil[1]{Independent Researcher}
+\affil[1]{Independent Researcher. Correspondence: \texttt{<your email>}}
 \date{\today}
 
 \begin{document}
@@ -32,35 +32,29 @@ in turbulent wing boundary layers}
 
 \begin{abstract}
 \noindent
-Turbulent boundary layers on wings are shaped by the local pressure
-gradient, by how fast that gradient is changing, and by Reynolds number.
-Separating these requires holding one fixed while varying another. The
-NACA4412 section is a natural vehicle because its pressure distribution is
-nearly independent of Reynolds number, and \citet{vinuesa2018} used this to
-attribute the differences between four large-eddy simulations spanning
-$\Rec = 10^5$ to $10^6$ to Reynolds number alone. We revisit that database
-and show first that the matched-$\beta$ premise holds only to tens of
-percent: the Clauser parameter falls monotonically with Reynolds number at
-every station, running on average $42\%$ higher at $\Rec = 2\times10^5$
-than at $10^6$. Because every quantity of interest grows with $\beta$, the
-residual mismatch acts in the same direction as the effect being measured.
-We then fit a three-term law in which the local pressure gradient, a
-dimensionless measure of how far the layer sits from equilibrium, and the
-friction Reynolds number enter as separate factors. It predicts a held-out
-Reynolds number to $1.0$--$7.7\%$ and, being linear in logarithms, splits
-the difference between two cases exactly. For the outer-region Reynolds
-shear stress, $76$--$92\%$ of the apparent Reynolds-number trend is
-attributable to the residual $\beta$ mismatch; for the wall and integral
-quantities and for turbulent kinetic energy production, Reynolds number
-dominates at $70$--$80\%$ and the original reading stands. The law transfers
-from the NACA4412 at $5^\circ$ to a NACA0012 at $0^\circ$ with $2.5$--$9.8\%$
-median error on five of six quantities. Applied to five flat-plate
-boundary layers with deliberately different pressure-gradient histories, the
-non-equilibrium term correctly contributes almost nothing: those layers sit
-near equilibrium, where local variables already suffice to $1$--$5\%$. The
-term therefore measures departure from equilibrium rather than a memory of
-distant upstream conditions, and we show that a memory length cannot be
-resolved on the wing grid at all.
+The NACA4412 aerofoil has a pressure distribution nearly independent of
+Reynolds number, and \citet{vinuesa2018} used this to attribute the
+differences between four large-eddy simulations spanning $\Rec = 10^5$ to
+$10^6$ to Reynolds number alone. We show the matched-$\beta$ premise holds
+only to tens of percent: the Clauser parameter falls monotonically with
+Reynolds number at every station, running $42\%$ higher at
+$\Rec = 2\times10^5$ than at $10^6$. Since every quantity of interest grows
+with $\beta$, the residual acts in the same direction as the effect being
+measured. Comparing a wing station and a flat-plate station at matched
+$\beta$ and $\Ret$, the outer-region stresses still differ by more than
+$40\%$, so those two parameters do not determine the state. We add a third:
+$\Lambda = (\dnn/\beta)\,\mathrm{d}\beta/\mathrm{d}x_t$, a dimensionless
+measure of departure from equilibrium. The resulting three-term law predicts
+a held-out Reynolds number to $1.0$--$7.7\%$ and, being linear in
+logarithms, splits the difference between cases exactly. For the
+outer-region Reynolds shear stress, $76$--$92\%$ of the apparent
+Reynolds-number trend is attributable to the residual $\beta$ mismatch; for
+wall and integral quantities and for turbulent kinetic energy production,
+Reynolds number dominates at $70$--$80\%$ and the original reading stands.
+$\Lambda$ removes $73$--$90\%$ of the error on the wing and nothing on five
+near-equilibrium flat-plate layers, which is how a non-equilibrium
+correction should behave. We also show that a convolution memory length is
+not resolvable on 50 chordwise stations.
 \end{abstract}
 
 \section{Introduction}
@@ -138,8 +132,20 @@ outflow boundary is approached.
 \paragraph{Reproduction.} Interpolating to the exact stations quoted in the
 source, all 48 tabulated quantities (Tables 3 and 4 and the maxima in its
 Section 3.1) are recovered to a median absolute error of $0.75\%$, with 47 of
-48 within $5\%$; the residual is dominated by $\beta$ being published to two
+48 within $5\%$ (Figure~\ref{fig:repro}); the residual is dominated by $\beta$ being published to two
 significant figures.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig05_bl_development.png}
+  \caption{Reproduction of Figure 5 of \citet{vinuesa2018} from the
+  distributed database: the Clauser parameter, momentum-thickness Reynolds
+  number and friction Reynolds number along the suction side. Recovered
+  maxima of $\Ret$ are 140, 230, 365 and 707 against the published 139, 231,
+  366 and 707. $\Rec = 10^5$ is dashed throughout the paper because the
+  original work shows it is not a well-behaved TBL.}
+  \label{fig:repro}
+\end{figure}
 
 \paragraph{Two traps.} Neither is stated in the distributions. First, the
 velocity scale behind every shipped integral quantity in WING ($C_f$,
@@ -199,6 +205,43 @@ attribution.
 \section{A three-term law}
 \label{sec:model}
 
+\subsection{Two parameters do not determine the state}
+\label{sec:matched}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_matched_profiles.png}
+  \caption{A wing station and a flat-plate station selected to have the same
+  pressure gradient and the same friction Reynolds number ($\beta$ within
+  $6\%$, $\Ret$ within $8\%$), out of 911 such pairs. The inner layers
+  collapse, as they must at matched $\Ret$, but the outer-region stresses
+  differ by $44$--$48\%$ at $y_n/\dnn = 0.2$. The flat plate has sat at this
+  pressure gradient long enough for its outer layer to respond; the wing
+  reached it recently and is still climbing.}
+  \label{fig:matched}
+\end{figure}
+
+Before adding a third variable it is worth asking whether two are already
+enough. Searching the two databases for stations at matched $\beta$ and
+matched $\Ret$ returns 911 pairs within $8\%$ on both. Figure~\ref{fig:matched}
+shows the closest of them.
+
+The inner layers collapse, as they must when $\Ret$ agrees. The outer
+layers do not: the flat plate carries $14.3$ in $\overline{u^2}^+$ against
+the wing's $6.0$, and $4.2$ in $-\overline{uv}^+$ against $1.8$. At
+$y_n/\dnn = 0.2$ the two differ by $48\%$ and $44\%$ respectively. A $6\%$
+mismatch in $\beta$ and $8\%$ in $\Ret$ cannot produce that: the fitted
+exponents of Section~\ref{sec:model} put their combined contribution near
+$4\%$.
+
+So $(\beta, \Ret)$ does not determine the state of a pressure-gradient
+boundary layer, and the discrepancy lives in the outer region. We note that
+the two flows differ in more than their approach to equilibrium -- the wing
+has surface curvature, and the two databases were post-processed
+separately -- so this figure establishes that a third parameter is needed
+rather than identifying which one. The rest of this section argues for a
+particular choice.
+
 \subsection{A resolved non-equilibrium parameter}
 \label{sec:resolution}
 
@@ -228,9 +271,20 @@ with $x_t$ arc length along the surface. $\Lambda$ measures how much the
 pressure gradient changes over one boundary-layer thickness, so it is a
 local measure of departure from equilibrium: it vanishes when $\beta$ is
 constant, is positive where the gradient steepens and negative where it
-relaxes. On the wing, substituting $\Lambda$ for the kernel changes
+relaxes (Figure~\ref{fig:lambda}). On the wing, substituting $\Lambda$ for the kernel changes
 accuracy by less than the spread between quantities
 (Table~\ref{tab:thirdterm}), confirming that the two are the same feature.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.78\textwidth]{figures/fig_lambda.png}
+  \caption{The non-equilibrium parameter of Equation~\eqref{eq:lambda}
+  through the analysis window. The wing is positive throughout and reaches
+  $1.4$ near the trailing edge; all five flat plates remain within $0.17$ of
+  zero. The scatter on the flat-plate curves is the numerical differentiation
+  of $\beta$ on 1570 stations and is not smoothed.}
+  \label{fig:lambda}
+\end{figure}
 
 \subsection{Functional form and fitting}
 
