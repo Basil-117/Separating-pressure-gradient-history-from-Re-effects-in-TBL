@@ -28,6 +28,21 @@ On the wing it removes most of the error; on the near-equilibrium
 flat plates it does almost nothing, and the kernel and the plain
 `d beta/dx` gradient are interchangeable throughout.
 
+## Fitted on wings, predicting flat plates
+
+| target   |   median_% |   p90_% |
+|:---------|-----------:|--------:|
+| H        |       6.74 |   13.82 |
+| Cf       |      26.85 |   57.94 |
+| Ue_plus  |      11.21 |   20.43 |
+| uu_outer |      36.91 |   54.02 |
+| uv_outer |      30.53 |   46.74 |
+| Pk_outer |      28.74 |   47.48 |
+
+The two flow classes occupy different parts of the
+(beta, Lambda, Re_tau) space, so the coefficients do not transfer
+even though the structure does.
+
 ## Does the headline split survive?
 
 |          |   memory |   dbeta_dx |

@@ -209,7 +209,26 @@ def main() -> None:
         print(f"=== {label}: median rel. error (%), leave-one-case-out ===")
         print(sub.round(2).to_string(), "\n")
 
-    # ---- 3. does the headline split survive the reinterpretation? ----
+    # ---- 3. does a wing-fitted law predict flat plates? ----
+    merged = {**full_w, **full_a}
+    tr_rows = []
+    for t in TARGETS:
+        if df_a[t].isna().all():
+            continue
+        sgn = SIGN.get(t, 1.0)
+        X_tr = design(df_w, merged, "dbeta_dx")
+        X_te = design(df_a, merged, "dbeta_dx")
+        coef, b = _solve(X_tr, np.log(sgn * df_w[t].to_numpy()))
+        pred = np.exp(X_te @ coef + b)
+        tr_rows.append(dict(target=t, **summarise_errors(
+            sgn * df_a[t].to_numpy(), pred)))
+    transfer = pd.DataFrame(tr_rows).set_index("target")
+    tt = (transfer[["median_rel", "p90_rel"]] * 100)
+    tt.columns = ["median_%", "p90_%"]
+    print("=== fitted on wings, predicting flat plates ===")
+    print(tt.round(2).to_string(), "\n")
+
+    # ---- 4. does the headline split survive the reinterpretation? ----
     shares = pd.DataFrame({
         "memory": {t: pg_share(df_w, full_w, t, "memory") for t in TARGETS},
         "dbeta_dx": {t: pg_share(df_w, full_w, t, "dbeta_dx") for t in TARGETS},
@@ -277,6 +296,11 @@ def main() -> None:
         "\n\nOn the wing it removes most of the error; on the near-equilibrium\n"
         "flat plates it does almost nothing, and the kernel and the plain\n"
         "`d beta/dx` gradient are interchangeable throughout.\n\n"
+        "## Fitted on wings, predicting flat plates\n\n"
+        + tt.round(2).to_markdown() +
+        "\n\nThe two flow classes occupy different parts of the\n"
+        "(beta, Lambda, Re_tau) space, so the coefficients do not transfer\n"
+        "even though the structure does.\n\n"
         "## Does the headline split survive?\n\n"
         + shares.round(1).to_markdown() +
         "\n\nThe ordering is unchanged, but `uu_outer` crosses 50%, so that\n"

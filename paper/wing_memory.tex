@@ -50,8 +50,8 @@ logarithms, splits the difference between cases exactly. For the
 outer-region Reynolds shear stress, $76$--$92\%$ of the apparent
 Reynolds-number trend is attributable to the residual $\beta$ mismatch; for
 wall and integral quantities and for turbulent kinetic energy production,
-Reynolds number dominates at $70$--$80\%$ and the original reading stands.
-$\Lambda$ removes $73$--$90\%$ of the error on the wing and nothing on five
+Reynolds number dominates at $65$--$80\%$ and the original reading stands.
+$\Lambda$ removes $73$--$91\%$ of the error on the wing and nothing on five
 near-equilibrium flat-plate layers, which is how a non-equilibrium
 correction should behave. We also show that a convolution memory length is
 not resolvable on 50 chordwise stations.
@@ -227,12 +227,12 @@ matched $\Ret$ returns 911 pairs within $8\%$ on both. Figure~\ref{fig:matched}
 shows the closest of them.
 
 The inner layers collapse, as they must when $\Ret$ agrees. The outer
-layers do not: the flat plate carries $14.3$ in $\overline{u^2}^+$ against
-the wing's $6.0$, and $4.2$ in $-\overline{uv}^+$ against $1.8$. At
-$y_n/\dnn = 0.2$ the two differ by $48\%$ and $44\%$ respectively. A $6\%$
-mismatch in $\beta$ and $8\%$ in $\Ret$ cannot produce that: the fitted
-exponents of Section~\ref{sec:model} put their combined contribution near
-$4\%$.
+layers do not. At $y_n/\dnn = 0.2$ the flat plate carries $11.1$ in
+$\overline{u^2}^+$ against the wing's $5.8$, and $3.1$ in
+$-\overline{uv}^+$ against $1.7$: differences of $48\%$ and $44\%$. The
+peak values, further out, differ by more still. A $6\%$ mismatch in $\beta$
+and $8\%$ in $\Ret$ cannot produce this; with the exponents fitted in
+Section~\ref{sec:model} they account for under $3\%$.
 
 So $(\beta, \Ret)$ does not determine the state of a pressure-gradient
 boundary layer, and the discrepancy lives in the outer region. We note that
@@ -255,9 +255,9 @@ stations. The kernel decays entirely inside a single quadrature panel, so
 the convolution collapses onto the local value and the feature degenerates
 into a finite difference. \textbf{A memory length is simply not resolvable
 on 50 chordwise stations}, and any value fitted there is a property of the
-grid rather than the flow. On the flat plates, with 1570 stations, the same
-length is $4$--$20$ spacings and is resolvable; there the fit prefers the
-shortest kernel available, with the objective rising monotonically in
+grid rather than the flow. On the flat plates, which ship 1570 stations, the
+same length spans several spacings and is resolvable; there the fit prefers
+the shortest kernel available, with the objective rising monotonically in
 $\ell$.
 
 We therefore drop the kernel in favour of the quantity it degenerates into,
@@ -355,7 +355,7 @@ separated.
 Table~\ref{tab:thirdterm} and Figure~\ref{fig:apg} contain the central
 validation of the functional form. On the wing, local $\beta$ and $\Ret$
 alone leave errors of $3.7$--$41.9\%$, and the non-equilibrium term removes
-$73$--$90\%$ of that. On the flat plates the same local variables already
+$73$--$91\%$ of that. On the flat plates the same local variables already
 suffice to $1.0$--$5.0\%$, and the term removes essentially nothing; for
 $C_f$ and $U_e^+$ it is marginally harmful.
 
@@ -415,7 +415,7 @@ at matched chordwise position splits exactly:
 Table~\ref{tab:split} gives the result. For the outer-region Reynolds shear
 stress, $76$--$92\%$ of the apparent Reynolds-number trend is attributable
 to the residual $\beta$ mismatch. For the wall and integral quantities and
-for TKE production, Reynolds number dominates at $70$--$80\%$ and the
+for TKE production, Reynolds number dominates at $65$--$80\%$ and the
 original reading stands. The streamwise fluctuation sits between the two,
 and the two parameterisations disagree on which side of $50\%$ it falls, so
 we quote it as $47$--$62\%$ and draw no conclusion from it.
@@ -470,7 +470,7 @@ $2.5$--$9.8\%$ on five of six quantities.
 
 Transfer to the flat plates is a harder test again, and the honest result is
 that a wing-fitted law does not predict them accurately: errors range from
-$9\%$ on $H$ to $47\%$ on $\overline{u^2}^+$. The two flow classes occupy
+$6.7\%$ on $H$ to $37\%$ on $\overline{u^2}^+$. The two flow classes occupy
 different parts of the $(\beta, \Lambda, \Ret)$ space, and the law is being
 asked to extrapolate in all three at once. What does transfer is the
 \emph{structure}: refitted on the flat plates, the same three terms give
@@ -493,9 +493,9 @@ the local pressure gradient and the non-local term is selected for all six
 targets under the kernel parameterisation, and improves four of six under
 the $\Lambda$ form; the exponent on $\beta$ therefore appears to depend on
 how far the layer is from equilibrium. But \textbf{selection optimism is a
-factor of $4.4$} (median, range $3.2$--$5.9$): the leave-one-out error used
-to choose among roughly a thousand candidates understates true held-out
-error by that much, and evaluated on the unseen NACA0012 the searched
+factor of $4.4$ in the median}, reaching $5.9$ on one target: the
+leave-one-out error used to choose among roughly a thousand candidates
+understates true held-out error by that much, and evaluated on the unseen NACA0012 the searched
 four-term expressions beat the three-term law on only four of six targets.
 The Pareto front shows a clear elbow at three terms. We therefore retain
 Equation~\eqref{eq:law} and report the interaction as an indicated direction
@@ -505,7 +505,7 @@ rather than adopting it.
 
 The decomposition splits the original finding in two. For the wall and
 integral quantities and for TKE production, Reynolds number accounts for
-$70$--$80\%$ of the difference between cases and the conclusion of
+$65$--$80\%$ of the difference between cases and the conclusion of
 \citet{vinuesa2018} is supported. For the outer-region shear stress it
 accounts for $8$--$24\%$, and the measured trend is predominantly residual
 pressure-gradient sensitivity. Since the outer region is where the proposed
@@ -552,8 +552,8 @@ than one.
   \item For the outer-region Reynolds shear stress, $76$--$92\%$ of the
         apparent Reynolds-number trend is attributable to the residual
         $\beta$ mismatch; for wall and integral quantities and TKE
-        production, Reynolds number dominates at $70$--$80\%$.
-  \item $\Lambda$ removes $73$--$90\%$ of the error on the wing and nothing
+        production, Reynolds number dominates at $65$--$80\%$.
+  \item $\Lambda$ removes $73$--$91\%$ of the error on the wing and nothing
         on five near-equilibrium flat-plate layers, which is the behaviour a
         non-equilibrium correction should show.
 \end{enumerate}

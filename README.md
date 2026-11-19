@@ -321,7 +321,7 @@ conventions, verified to six decimals across all cases.
 | `uv_outer` | 20.68% | **3.09%** | 3.68% | 2.92% |
 | `Pk_outer` | 41.88% | **7.74%** | 4.10% | 4.02% |
 
-On the wing it removes 73–90% of the error. On the flat plates it removes
+On the wing it removes 73–91% of the error. On the flat plates it removes
 nothing, and for `Cf` and `Ue_plus` it is slightly harmful.
 
 That is the right behaviour, and it is the strongest evidence the term means
