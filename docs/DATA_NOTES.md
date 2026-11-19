@@ -230,3 +230,87 @@ unseen NACA0012, the searched four-term expressions beat the three-term
 power law on only four of six targets. Any symbolic-regression result on a
 dataset this size should be reported with a genuinely held-out score, not
 with the criterion it was selected on.
+
+## 10. The APG flat-plate database, and what it revised
+
+Obtained on request from R. Vinuesa, November 2026 (`APG.mat`, 306 MB). Five
+cases from Bobke et al. (2017): `b1`, `b2` at nominally constant `beta` of 1
+and 2, and `m13`, `m16`, `m18` following a power-law freestream
+`U_e ~ x^m`. 1570 chordwise stations per case, 301-401 wall-normal points.
+
+### The velocity scale is the opposite of WING's
+
+Every shipped integral quantity here is built on the **`Ue` field**. In WING
+they are built on **`max(U)`** and `Ue` is something else (section 1).
+Verified by inverting `Cf`, `Reds` and `Reth` for the velocity each implies:
+all three agree with `Ue` to six decimal places across all five cases.
+Two databases, one lab, one file format, opposite conventions. Reusing the
+wing loader here would be silently wrong.
+
+Units are inlet-based: `x` runs 200-2500, `nu` = 1/450, lengths in inlet
+displacement thicknesses.
+
+### Analysis window
+
+`700 <= x <= 1900`. Below 700 the pressure gradient is still being
+established; above 1900 `beta` collapses towards zero and turns negative as
+the outflow boundary is approached, which is a domain-end artefact.
+
+### The memory length was never resolved on the wing
+
+A memory length of `0.5 delta99` corresponds to `ell/dx` of **0.47** on the
+wing grid and **4.3** on the flat plates (at stride 4; 20.5 at full
+resolution). Below 1 the exponential kernel decays inside a single
+quadrature panel, `beta_bar` collapses onto the local `beta`, and the
+feature degenerates into a finite-difference gradient. **The wing fit of
+`ell` = 0.43-0.59 reported a length its own grid could not represent**, and
+the Phase 1 and Phase 2 statements about memory length should be read as
+statements about a local gradient.
+
+### What the third term actually measures
+
+The local rate of change of `beta`. On the wing, replacing the kernel with
+a plain `(d beta/dx) * delta99 / beta` term gives interchangeable accuracy
+(`H` 1.33 vs 1.00%, `Cf` 3.00 vs 3.93%, `uv` 3.34 vs 3.09%). The two
+parameterisations are the same feature to first order, since the kernel's
+`ell -> 0` limit is exactly that gradient.
+
+### The term tracks departure from equilibrium
+
+| | wing | flat plate |
+|---|---|---|
+| local features only | 3.7-41.9% | 1.0-5.0% |
+| best third term | 1.0-6.3% | 0.9-4.0% |
+| error removed | **73-90%** | **-8 to +29%** |
+
+On the wing, local `beta` and `Re_tau` alone are badly insufficient and the
+third term removes most of the error. On the flat plates they are already
+sufficient to 1-5%, and the third term adds nothing (it makes `Cf` and
+`Ue_plus` slightly worse).
+
+This is coherent rather than contradictory. The wing's `beta` climbs from
+0.3 to 46 across the window; the flat-plate cases were constructed to sit
+near equilibrium and their `beta` is nearly flat. The term measures how far
+the layer is from equilibrium, and correctly reports "not far" where that is
+true. Bobke et al. titled their paper "History effects and *near
+equilibrium*" for the same reason.
+
+### Consequence for the headline split
+
+Pressure-gradient share of the `W2 -> W10` change, under both
+parameterisations:
+
+| target | kernel | `d beta/dx` |
+|---|---|---|
+| `uv_outer` | 76.4% | 91.6% |
+| `uu_outer` | 62.1% | 46.9% |
+| `Cf` | 34.8% | 30.5% |
+| `Ue_plus` | 34.8% | 30.5% |
+| `H` | 33.3% | 25.9% |
+| `Pk_outer` | 25.9% | 19.5% |
+
+The ordering is unchanged and the conclusion stands for `uv_outer`
+(76-92%, pressure-gradient dominated) and for the wall, integral and
+production quantities (70-80% Reynolds number). But `uu_outer` crosses 50%,
+so it must be quoted as a range, 47-62%, and not as "64% pressure
+gradient".
