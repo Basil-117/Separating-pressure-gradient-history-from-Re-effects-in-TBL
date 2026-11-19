@@ -281,7 +281,7 @@ parameterisations are the same feature to first order, since the kernel's
 |---|---|---|
 | local features only | 3.7-41.9% | 1.0-5.0% |
 | best third term | 1.0-6.3% | 0.9-4.0% |
-| error removed | **73-90%** | **-8 to +29%** |
+| error removed | **73-91%** | **-8 to +29%** |
 
 On the wing, local `beta` and `Re_tau` alone are badly insufficient and the
 third term removes most of the error. On the flat plates they are already
