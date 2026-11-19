@@ -8,7 +8,6 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{caption}
-\usepackage{subcaption}
 \usepackage{authblk}
 \usepackage[hidelinks]{hyperref}
 \usepackage{natbib}
@@ -19,11 +18,10 @@
 \newcommand{\Rec}{\mathrm{Re}_c}
 \newcommand{\Ret}{\mathrm{Re}_\tau}
 \newcommand{\Reth}{\mathrm{Re}_\theta}
-\newcommand{\bbar}{\bar{\beta}}
 \newcommand{\dnn}{\delta_{99}}
 
-\title{\bfseries Separating pressure-gradient history from Reynolds-number
-effects in turbulent wing boundary layers}
+\title{\bfseries Separating pressure-gradient and Reynolds-number effects
+in turbulent wing boundary layers}
 
 \author[1]{Basil Mehmood}
 \affil[1]{Independent Researcher}
@@ -34,125 +32,131 @@ effects in turbulent wing boundary layers}
 
 \begin{abstract}
 \noindent
-Turbulent boundary layers on wings are shaped both by the local pressure
-gradient and by the pressure gradient they have already passed through, and
-separating those from Reynolds-number effects requires holding one fixed
-while varying the other. The NACA4412 section is a natural vehicle, because
-its pressure distribution is almost independent of Reynolds number, and
-\citet{vinuesa2018} used exactly this to attribute the differences between
-four large-eddy simulations at $\Rec = 10^5$ to $10^6$ to Reynolds number
-alone. We revisit that database and show, first, that the matched-$\beta$
-premise holds only to tens of percent: the Clauser parameter decreases
-monotonically with Reynolds number at every station, running on average
-$42\%$ higher at $\Rec = 2\times10^5$ than at $10^6$ over
-$0.25 \le x/c \le 0.95$. Because every quantity of interest increases with
-$\beta$, the residual mismatch acts in the same direction as the effect
-being measured. We then fit a three-term power law in which the local
-pressure gradient, a kernel-weighted memory of the upstream pressure
-gradient, and the friction Reynolds number appear as separate factors, with
-the memory length fitted inside each training fold. The law predicts a
-held-out Reynolds number to $1.2$--$9.2\%$ and, being linear in logarithms,
-splits the difference between two cases exactly. For the outer-region
-Reynolds stresses, the quantities that carry the original argument,
-$64$--$77\%$ of the apparent Reynolds-number trend is attributable to the
-residual $\beta$ mismatch; for the wall and integral quantities and for
-turbulent kinetic energy production, Reynolds number dominates and the
-original reading stands. The law transfers unchanged from the NACA4412 at
-$5^\circ$ to a NACA0012 at $0^\circ$ with $2.5$--$9.8\%$ median error on
-five of six quantities. Finally, an exhaustive search over expressions
-selects the interaction between local $\beta$ and the memory ratio for all
-six targets, indicating that history and local pressure gradient multiply
-rather than acting as separable factors.
+Turbulent boundary layers on wings are shaped by the local pressure
+gradient, by how fast that gradient is changing, and by Reynolds number.
+Separating these requires holding one fixed while varying another. The
+NACA4412 section is a natural vehicle because its pressure distribution is
+nearly independent of Reynolds number, and \citet{vinuesa2018} used this to
+attribute the differences between four large-eddy simulations spanning
+$\Rec = 10^5$ to $10^6$ to Reynolds number alone. We revisit that database
+and show first that the matched-$\beta$ premise holds only to tens of
+percent: the Clauser parameter falls monotonically with Reynolds number at
+every station, running on average $42\%$ higher at $\Rec = 2\times10^5$
+than at $10^6$. Because every quantity of interest grows with $\beta$, the
+residual mismatch acts in the same direction as the effect being measured.
+We then fit a three-term law in which the local pressure gradient, a
+dimensionless measure of how far the layer sits from equilibrium, and the
+friction Reynolds number enter as separate factors. It predicts a held-out
+Reynolds number to $1.0$--$7.7\%$ and, being linear in logarithms, splits
+the difference between two cases exactly. For the outer-region Reynolds
+shear stress, $76$--$92\%$ of the apparent Reynolds-number trend is
+attributable to the residual $\beta$ mismatch; for the wall and integral
+quantities and for turbulent kinetic energy production, Reynolds number
+dominates at $70$--$80\%$ and the original reading stands. The law transfers
+from the NACA4412 at $5^\circ$ to a NACA0012 at $0^\circ$ with $2.5$--$9.8\%$
+median error on five of six quantities. Applied to five flat-plate
+boundary layers with deliberately different pressure-gradient histories, the
+non-equilibrium term correctly contributes almost nothing: those layers sit
+near equilibrium, where local variables already suffice to $1$--$5\%$. The
+term therefore measures departure from equilibrium rather than a memory of
+distant upstream conditions, and we show that a memory length cannot be
+resolved on the wing grid at all.
 \end{abstract}
 
 \section{Introduction}
 
-Turbulent boundary layers (TBLs) subjected to streamwise pressure gradients
-(PGs) occur wherever a surface is curved, and the adverse-pressure-gradient
-(APG) layer on the suction side of a wing is among the most consequential
-cases. Its behaviour is not set by the local pressure gradient alone.
-\citet{clauser1956} observed that the outer part of a boundary layer has a
-long memory, so that its state depends on the sequence of conditions it has
-passed through, and \citet{bobke2017} demonstrated that two layers at the
-same local Clauser parameter
+Turbulent boundary layers (TBLs) under streamwise pressure gradients (PGs)
+occur wherever a surface is curved, and the adverse-pressure-gradient (APG)
+layer on the suction side of a wing is among the most consequential cases.
+Its state is not set by the local pressure gradient alone. \citet{clauser1956}
+observed that the outer layer responds slowly, so that its condition depends
+on the sequence of conditions it has passed through, and \citet{bobke2017}
+showed that two layers at the same local Clauser parameter
 \begin{equation}
   \beta = \frac{\delta^*}{\tau_w}\frac{\mathrm{d}P_e}{\mathrm{d}x}
   \label{eq:beta}
 \end{equation}
-can differ substantially if they arrived there by different routes.
+can differ appreciably if they reached it by different routes.
 
-Disentangling history from Reynolds number requires a configuration in
-which one can be held fixed. The NACA4412 section provides it: at moderate
-angles of attack its pressure distribution is nearly independent of
-Reynolds number \citep{pinkerton1938}, so simulations at different $\Rec$
-nominally experience the same $\beta(x)$. \citet{vinuesa2018} exploited
-this with four well-resolved large-eddy simulations (LES) spanning
-$\Rec = 10^5$ to $10^6$ at $5^\circ$ incidence, comparing each against a
-zero-pressure-gradient (ZPG) layer at matched $\Ret$. They reported that
-the ratios of edge velocity, shape factor, Reynolds stresses and outer-layer
-production all decrease with $\Rec$, and concluded that lower-Reynolds-number
-layers are more sensitive to a given pressure gradient, with two
-complementary mechanisms, one tied to Reynolds number and one to the APG,
-energising the outer region.
+Disentangling this from Reynolds number requires a configuration in which
+one can be held fixed. The NACA4412 provides it: at moderate incidence its
+pressure distribution is nearly independent of Reynolds number
+\citep{pinkerton1938}, so simulations at different $\Rec$ nominally climb
+the same pressure hill. \citet{vinuesa2018} exploited this with four
+well-resolved large-eddy simulations (LES) from $\Rec = 10^5$ to $10^6$ at
+$5^\circ$ incidence, comparing each against a zero-pressure-gradient (ZPG)
+layer at matched $\Ret$. They reported that the ratios of edge velocity,
+shape factor, Reynolds stresses and outer-layer production all decrease with
+$\Rec$, concluding that lower-Reynolds-number layers are more sensitive to a
+given pressure gradient, with the effect strongest in the outer region.
 
-That conclusion rests entirely on $\beta(x)$ being matched between the
-cases. In Section~\ref{sec:confound} we show that it is matched only to
-tens of percent, and that the residual varies monotonically with Reynolds
-number, so that it is confounded with the quantity being measured. The rest
-of the paper supplies the decomposition that the original comparison could
-not: a model in which local pressure gradient, flow history and Reynolds
-number enter as separate, identifiable terms.
+That conclusion rests on $\beta(x)$ being matched between cases. In
+Section~\ref{sec:confound} we show it is matched only to tens of percent,
+with a residual that varies monotonically with Reynolds number and so is
+confounded with the quantity being measured. The remainder of the paper
+supplies the decomposition the original comparison could not.
 
 Our contributions are:
 \begin{enumerate}
   \item a reproduction of \citet{vinuesa2018} from the distributed database,
         agreeing to a median of $0.75\%$ across 48 published quantities, with
-        two documented discrepancies in how the database must be read
+        two documented traps in how the files must be read
         (Section~\ref{sec:data});
   \item a quantification of the residual $\beta$ mismatch and its direction
         (Section~\ref{sec:confound});
-  \item a three-term power law with a fitted memory length that predicts a
-        held-out Reynolds number to $1.2$--$9.2\%$ and splits the difference
-        between cases exactly (Sections~\ref{sec:model}--\ref{sec:decomp});
-  \item cross-geometry validation on a NACA0012, and an exhaustive symbolic
-        search showing that history and local pressure gradient multiply
-        (Section~\ref{sec:general}).
+  \item a three-term law whose non-local term is a resolved, dimensionless
+        non-equilibrium parameter, and an exact split of the difference
+        between cases (Sections~\ref{sec:model}--\ref{sec:decomp});
+  \item validation across geometry and across flow class, including the
+        demonstration that the non-equilibrium term correctly switches itself
+        off on near-equilibrium flat plates (Section~\ref{sec:general}).
 \end{enumerate}
 
-\section{Database and reproduction}
+\section{Databases and reproduction}
 \label{sec:data}
 
-We use the publicly documented WING database of \citet{vinuesa2018} and
-\citet{tanarro2020}: well-resolved LES of the flow around a NACA4412 at
-$\Rec = 10^5$, $2\times10^5$, $4\times10^5$ and $10^6$ at $5^\circ$
-incidence, computed with the spectral-element code Nek5000, plus a NACA0012
-at $\Rec = 4\times10^5$. Statistics are distributed at 50 chordwise
-stations per side, in the local tangential and wall-normal frame, with
-$U_e$ and $\dnn$ obtained by the diagnostic-scaling method of
+\paragraph{Wings.} The WING database of \citet{vinuesa2018} and
+\citet{tanarro2020}: well-resolved LES around a NACA4412 at
+$\Rec = 10^5$, $2\times10^5$, $4\times10^5$ and $10^6$ at $5^\circ$, computed
+with the spectral-element code Nek5000, plus a NACA0012 at
+$\Rec = 4\times10^5$ and $0^\circ$. Statistics are distributed at 50
+chordwise stations per side in the local tangential and wall-normal frame,
+with $U_e$ and $\dnn$ from the diagnostic-scaling method of
 \citet{vinuesa2016}. We follow the original analysis window
-$0.25 \le x/c \le 0.95$: below it the layer is still accelerating and close
-to the trip at $x/c = 0.1$; above it the structures detach from the wall and
-the boundary-layer description loses meaning.
+$0.25 \le x/c \le 0.95$.
+
+\paragraph{Flat plates.} The APG database of \citet{bobke2017}: five
+flat-plate TBLs with deliberately different pressure-gradient histories, two
+at nominally constant $\beta$ of 1 and 2 and three following a power-law
+freestream $U_e \sim x^m$ with $m = -0.13$, $-0.16$, $-0.18$. These ship
+1570 streamwise stations per case, a factor of thirty finer than the wing
+database, which proves decisive in Section~\ref{sec:resolution}. We use
+$700 \le x \le 1900$ in inlet units: below this the pressure gradient is
+still being established, and above it $\beta$ collapses towards zero as the
+outflow boundary is approached.
 
 \paragraph{Reproduction.} Interpolating to the exact stations quoted in the
-source, all 48 tabulated quantities (Tables 3 and 4 and the maxima quoted in
-its Section 3.1) are recovered to a median absolute error of $0.75\%$, with
-$47$ of $48$ within $5\%$; the residual is dominated by $\beta$ being
-published to two significant figures.
+source, all 48 tabulated quantities (Tables 3 and 4 and the maxima in its
+Section 3.1) are recovered to a median absolute error of $0.75\%$, with 47 of
+48 within $5\%$; the residual is dominated by $\beta$ being published to two
+significant figures.
 
-\paragraph{Two caveats in reading the files.} Both are easy to get wrong and
-neither is stated in the distribution. First, the velocity scale behind every
-shipped integral quantity ($C_f$, $\mathrm{Re}_{\delta^*}$, $\Reth$,
-$\delta^*$ and $\theta$) is the \emph{maximum} tangential velocity of each
-profile, not the \texttt{Ue} field stored alongside it. We verified this by
-inverting each quantity for the velocity it implies, obtaining agreement with
-$\max(U)$ to machine precision across all nine distributed cases. Using
-\texttt{Ue} instead, the obvious reading, puts the integral thicknesses out by
-$9$--$13\%$ and $C_f$ by about $6\%$. Second, $\beta$ cannot be recomputed
-from the 50 stored stations to better than a median of $\sim\!7\%$, because
-they under-resolve $\mathrm{d}P_e/\mathrm{d}x$; near the leading edge the
-recomputed value disagrees in sign. We therefore use the distributed $\beta$
-throughout.
+\paragraph{Two traps.} Neither is stated in the distributions. First, the
+velocity scale behind every shipped integral quantity in WING ($C_f$,
+$\mathrm{Re}_{\delta^*}$, $\Reth$, $\delta^*$ and $\theta$) is the
+\emph{maximum} tangential velocity of each profile, not the \texttt{Ue}
+field stored alongside it. We verified this by inverting each quantity for
+the velocity it implies, obtaining agreement with $\max(U)$ to machine
+precision across all nine distributed cases; using \texttt{Ue} instead puts
+the integral thicknesses out by $9$--$13\%$ and $C_f$ by about $6\%$.
+Second, and in the opposite direction, the APG database \emph{does} use its
+\texttt{Ue} field, verified the same way to six decimal places across all
+five cases. Two databases from one group, in one file format, with opposite
+conventions.
+
+Finally, $\beta$ cannot be recomputed from the 50 stored wing stations to
+better than a median of ${\sim}7\%$, because they under-resolve
+$\mathrm{d}P_e/\mathrm{d}x$; we use the distributed values throughout.
 
 \section{The matched-$\beta$ premise}
 \label{sec:confound}
@@ -168,10 +172,10 @@ throughout.
   \label{fig:confound}
 \end{figure}
 
-\citet{vinuesa2018} describe the $\Rec \ge 2\times10^5$ cases as subjected
-to ``approximately the same'' $\beta(x)$, with relative differences ``on the
-order of 10\%'' arising only beyond $x/c > 0.9$. Over the analysis window
-the distributed data give
+\citet{vinuesa2018} describe the $\Rec \ge 2\times10^5$ cases as subjected to
+``approximately the same'' $\beta(x)$, with differences ``on the order of
+10\%'' arising only beyond $x/c > 0.9$. Over the analysis window the
+distributed data give
 \begin{equation*}
   \frac{\beta(\Rec = 2\times10^5)}{\beta(\Rec = 10^6)} = 1.42
   \;(1.17\text{--}1.74), \qquad
@@ -181,140 +185,143 @@ the distributed data give
 with $\beta$ decreasing monotonically with Reynolds number at \emph{every}
 station. The source's own Table 4 is consistent: at $x/c = 0.7$ it lists
 $\beta = 2.6$, $2.4$ and $2.0$, a ratio of $1.30$ rather than $1.10$. The
-apparent collapse in its Figure 5 is a consequence of the logarithmic axis,
-on which a factor of $1.4$ is a hairline offset (Figure~\ref{fig:confound}).
+apparent collapse in its Figure 5 follows from the logarithmic axis, on
+which a factor of $1.4$ is a hairline (Figure~\ref{fig:confound}).
 
 This matters because the reported effect and the residual mismatch act in
-the same direction. The ratios $\Phi$ of wing to ZPG quantities all increase
-with $\beta$; $\beta$ decreases with $\Rec$; therefore $\Phi$ would decrease
-with $\Rec$ even if the boundary layer had no intrinsic Reynolds-number
-sensitivity at all. Nothing here contradicts the physical mechanism
-proposed in the original work, which is independently supported by the
-wall-normal velocity distributions. What is missing is the attribution.
+the same direction. The wing-to-ZPG ratios all grow with $\beta$; $\beta$
+falls with $\Rec$; so those ratios would fall with $\Rec$ even if the layer
+had no intrinsic Reynolds-number sensitivity. Nothing here contradicts the
+physical mechanism proposed in the original work, which is independently
+supported by the wall-normal velocity distributions. What is missing is the
+attribution.
 
-\section{A power law with a fitted memory}
+\section{A three-term law}
 \label{sec:model}
 
-\subsection{History variable}
+\subsection{A resolved non-equilibrium parameter}
+\label{sec:resolution}
 
-We summarise the upstream pressure gradient by an exponentially weighted
-mean,
+A natural way to encode history is to convolve $\beta$ with a decaying
+kernel of length $\ell$ and let the data choose $\ell$. We did this first,
+and it fails for a reason worth recording.
+
+On the wing database a memory length of $0.5\,\dnn$ corresponds to
+$\ell/\Delta x = 0.47$, where $\Delta x$ is the spacing between stored
+stations. The kernel decays entirely inside a single quadrature panel, so
+the convolution collapses onto the local value and the feature degenerates
+into a finite difference. \textbf{A memory length is simply not resolvable
+on 50 chordwise stations}, and any value fitted there is a property of the
+grid rather than the flow. On the flat plates, with 1570 stations, the same
+length is $4$--$20$ spacings and is resolvable; there the fit prefers the
+shortest kernel available, with the objective rising monotonically in
+$\ell$.
+
+We therefore drop the kernel in favour of the quantity it degenerates into,
+which is resolved, dimensionless, and signed:
 \begin{equation}
-  \bbar(x;\ell) =
-  \frac{\displaystyle\int_{x_0}^{x} \beta(\xi)\,
-        \exp\!\left(-\frac{s(x)-s(\xi)}{\ell}\right)\mathrm{d}\xi}
-       {\displaystyle\int_{x_0}^{x}
-        \exp\!\left(-\frac{s(x)-s(\xi)}{\ell}\right)\mathrm{d}\xi},
-  \qquad \ell = m\,\dnn(x),
-  \label{eq:kernel}
+  \Lambda \;=\; \frac{\dnn}{\beta}\,
+  \frac{\mathrm{d}\beta}{\mathrm{d}x_t},
+  \label{eq:lambda}
 \end{equation}
-where $s$ is arc length along the surface and the memory length scales with
-the local boundary-layer thickness, so that the kernel widens as the layer
-grows. Normalising by the kernel's own integral over the available upstream
-distance is essential: without it, stations near the start of the data would
-be assigned a small history merely because less wing lies upstream, and the
-model would learn chordwise position rather than memory. As defined,
-$\bbar$ is a weighted mean of $\beta$ and is directly comparable with the
-local value. Integration always uses arc length rather than $x/c$, since the
-surface slope departs far from unity on the forward part of the section.
+with $x_t$ arc length along the surface. $\Lambda$ measures how much the
+pressure gradient changes over one boundary-layer thickness, so it is a
+local measure of departure from equilibrium: it vanishes when $\beta$ is
+constant, is positive where the gradient steepens and negative where it
+relaxes. On the wing, substituting $\Lambda$ for the kernel changes
+accuracy by less than the spread between quantities
+(Table~\ref{tab:thirdterm}), confirming that the two are the same feature.
 
-\subsection{Functional form}
+\subsection{Functional form and fitting}
 
-We fit, for each target $y$,
+For each target $y$ we fit
 \begin{equation}
-  y = C\,\beta^{a_1}\,
-      \left(\frac{\bbar}{\beta}\right)^{a_2}\,
-      \Ret^{\,a_3}.
+  \log y \;=\; \log C \;+\; a_1 \log\beta \;+\; a_2\,\Lambda
+  \;+\; a_3 \log\Ret .
   \label{eq:law}
 \end{equation}
-Three considerations fix this form. It is the smallest expression with a
-separate term for each candidate cause. It is linear in logarithms, so
-Shapley attribution is exact and analytic rather than sampled, and the
-difference between two cases decomposes without approximation. And with
-roughly 40 usable stations per Reynolds number, three coefficients and one
-length is close to the most the data supports, which agrees with our finding
-that ridge regression in log space outperforms gradient boosting on every
-target under leave-one-Reynolds-number-out validation, because the held-out
-fold requires extrapolating in $\Ret$ rather than interpolating.
+This is the smallest expression with a separate term for each candidate
+cause. It is linear in logarithms, so Shapley attribution is exact and
+analytic rather than sampled, and the difference between two cases
+decomposes without approximation. $\Lambda$ enters linearly rather than
+logarithmically because it changes sign.
 
-The history term is deliberately the \emph{ratio} $\bbar/\beta$ rather than
-$\bbar$. Parameterised as separate powers of $\beta$ and $\bbar$, the two are
-nearly collinear, since at short memory $\bbar \to \beta$, and the fit returns
-equal-and-opposite exponents of order $\pm 7$ that are unstable and
-uninterpretable. Since
-$\beta^{a_1}\bbar^{a_2} = \beta^{a_1+a_2}(\bbar/\beta)^{a_2}$, the ratio
-form is an exact reparameterisation of the same model class in which the two
-terms carry distinct meanings, and in which the history term switches itself
-off as $\ell \to 0$.
+With roughly 40 usable stations per Reynolds number, three coefficients is
+close to the most the data supports. Consistently, we find that ridge
+regression in log space outperforms gradient boosting on every target under
+leave-one-Reynolds-number-out validation, because the held-out fold requires
+extrapolating in $\Ret$ rather than interpolating.
 
-\subsection{Fitting and validation}
-
-For fixed $\ell$ the model is linear and solved exactly by regularised least
-squares, leaving a one-dimensional search over $\ell$ (variable projection).
-This is global over the searched interval and has no learning rate,
-initialisation or stopping rule.
-
-Validation is leave-one-Reynolds-number-out: the model must predict a
-Reynolds number it has never seen. Random splits would be meaningless, since
-adjacent stations on the same wing are nearly the same boundary layer.
-Crucially, $\ell$ is selected by an inner leave-one-case-out \emph{within}
-the training fold; selecting it on held-out error, as a naive scan does, is
-selection on the test set. The $\Rec = 10^5$ case is excluded throughout: the
+Validation is leave-one-case-out throughout: the model must predict a
+Reynolds number, or a pressure-gradient history, it has never seen. Random
+splits would be meaningless, since adjacent stations on the same surface are
+nearly the same boundary layer. The $\Rec = 10^5$ wing case is excluded: the
 original work shows it is not a well-behaved TBL, and its final station has
 separated.
 
-\subsection{Identifiability}
-
-On synthetic data generated from Equation~\eqref{eq:law} the fitter recovers
-$\ell$ and all three exponents to four significant figures. Adding $0.2\%$
-noise in log space, well below the scatter in the LES statistics, moves the
-fitted $\ell$ by $15$--$27\%$ and $a_2$ by up to $65\%$, because a shorter
-memory shrinks $\log(\bbar/\beta)$ and a larger $|a_2|$ compensates almost
-exactly. We therefore quote $\ell$ to a factor of order $1.3$ and never to two
-digits. The decomposition of Section~\ref{sec:decomp} is built from the
-product $a_2\log(\bbar/\beta)$, in which the trade-off cancels; we verify
-below that forcing $\ell$ to half or double its fitted value leaves the
-result essentially unchanged.
-
-\section{Decomposition}
-\label{sec:decomp}
+\subsection{The third term earns its place only off equilibrium}
 
 \begin{table}[t]
   \centering
   \small
-  \caption{Fitted law under leave-one-Reynolds-number-out, with the memory
-  length refitted inside each training fold. $\ell$ is in multiples of the
-  local $\dnn$; the range is across folds. Outer-region quantities are
-  sampled at $y_n/\dnn = 0.2$.}
-  \label{tab:fit}
-  \begin{tabular}{lcccccc}
+  \caption{Median relative error (\%) under leave-one-case-out, with and
+  without the non-local term. Outer-region quantities are sampled at
+  $y_n/\dnn = 0.2$. The kernel and $\Lambda$ parameterisations are
+  interchangeable; on the flat plates neither is needed.}
+  \label{tab:thirdterm}
+  \begin{tabular}{lccc@{\hskip 2em}ccc}
     \toprule
-    target & $\ell/\dnn$ & (fold range) & $a_1$ & $a_2$ & $a_3$ &
-    held-out error \\
+    & \multicolumn{3}{c}{wing (NACA4412)} &
+      \multicolumn{3}{c}{flat plates (five histories)} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    target & local only & kernel & $\Lambda$ & local only & kernel & $\Lambda$ \\
     \midrule
-    $H$                      & 0.59 & 0.57--0.70 & $ 0.03$ & $ -0.88$ & $-0.07$ & 1.15\% \\
-    $C_f$                    & 0.43 & 0.41--0.48 & $-0.04$ & $  8.14$ & $-0.35$ & 2.36\% \\
-    $U_e^+$                  & 0.43 & 0.41--0.48 & $ 0.02$ & $ -4.07$ & $ 0.17$ & 1.20\% \\
-    $\overline{u_t^2}^+$     & 0.46 & 0.46--0.60 & $ 0.09$ & $ -7.45$ & $-0.14$ & 9.24\% \\
-    $\overline{u_tv_n}^+$    & 0.45 & 0.41--0.52 & $ 0.15$ & $ -6.67$ & $ 0.06$ & 3.82\% \\
-    $P_k^+$                  & 0.47 & 0.46--0.58 & $ 0.17$ & $-11.36$ & $-0.97$ & 6.08\% \\
+    $H$                   &  3.67 & 1.33 & 1.00 & 0.96 & 1.07 & 0.93 \\
+    $C_f$                 & 26.37 & 3.00 & 3.93 & 3.44 & 4.02 & 3.69 \\
+    $U_e^+$               & 16.40 & 1.46 & 1.95 & 1.67 & 1.95 & 1.80 \\
+    $\overline{u^2}^+$    & 30.98 & 8.93 & 6.32 & 5.04 & 4.73 & 4.82 \\
+    $\overline{uv}^+$     & 20.68 & 3.34 & 3.09 & 3.68 & 2.61 & 2.92 \\
+    $P_k^+$               & 41.88 & 6.05 & 7.74 & 4.10 & 4.08 & 4.02 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Table~\ref{tab:fit} reports the fit. The memory length is short and stable
-across folds for every quantity, $\ell \approx 0.4$--$0.6\,\dnn$, and the
-inner objective is sharply peaked: error rises by a factor of $10$--$24$ as
-$\ell \to 0$, where the history term switches off, and by $5$--$10$ by
-$\ell = 17\,\dnn$. Flow history carries a great deal of information, over a
-distance of order the local boundary-layer thickness.
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_apg.png}
+  \caption{\textbf{Left:} $\beta$ through the analysis window for the five
+  flat-plate histories and for the wing, on a common normalised abscissa.
+  The flat plates were constructed to sit near equilibrium; the wing's
+  $\beta$ climbs by more than two orders of magnitude. \textbf{Right:}
+  fraction of the leave-one-case-out error removed by adding the non-local
+  term.}
+  \label{fig:apg}
+\end{figure}
 
-Because Equation~\eqref{eq:law} is linear in logarithms, the difference
-between two cases at matched chordwise position splits exactly:
+Table~\ref{tab:thirdterm} and Figure~\ref{fig:apg} contain the central
+validation of the functional form. On the wing, local $\beta$ and $\Ret$
+alone leave errors of $3.7$--$41.9\%$, and the non-equilibrium term removes
+$73$--$90\%$ of that. On the flat plates the same local variables already
+suffice to $1.0$--$5.0\%$, and the term removes essentially nothing; for
+$C_f$ and $U_e^+$ it is marginally harmful.
+
+This is coherent rather than contradictory, and it is the strongest evidence
+that $\Lambda$ means what we claim. The wing's $\beta$ climbs from $0.3$ to
+$46$ across the window, so $\Lambda$ is large and the layer is far from
+equilibrium. The flat-plate cases were constructed to sit near equilibrium
+and their $\beta$ is nearly flat, so $\Lambda \approx 0$ and the term
+correctly reports that nothing is missing. A term that improved both would
+be suspect; one that improves exactly the case that is out of equilibrium is
+behaving as a non-equilibrium correction should.
+
+\section{Decomposition}
+\label{sec:decomp}
+
+Because Equation~\eqref{eq:law} is linear, the difference between two cases
+at matched chordwise position splits exactly:
 \begin{equation}
   \underbrace{\Delta \log y}_{\text{observed}} =
-  \underbrace{a_1\,\Delta\log\beta
-            + a_2\,\Delta\log(\bbar/\beta)}_{\text{pressure gradient}}
+  \underbrace{a_1\,\Delta\log\beta + a_2\,\Delta\Lambda}_{\text{pressure gradient}}
   + \underbrace{a_3\,\Delta\log\Ret}_{\text{Reynolds number}} .
   \label{eq:split}
 \end{equation}
@@ -322,57 +329,72 @@ between two cases at matched chordwise position splits exactly:
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig_decomposition.png}
-  \caption{\textbf{Left:} the change from $\Rec = 2\times10^5$ to $10^6$,
-  averaged over $0.30 \le x/c \le 0.90$, split by
-  Equation~\eqref{eq:split}. The split is exactly additive, so the stack
-  reaches the observed total. \textbf{Right:} the share attributed to the
-  pressure gradient as a function of chordwise position.}
+  \caption{The change from $\Rec = 2\times10^5$ to $10^6$, averaged over
+  $0.30 \le x/c \le 0.90$, split by Equation~\eqref{eq:split}. The split is
+  exactly additive, so the stack reaches the observed total. Shown for the
+  kernel parameterisation; Table~\ref{tab:split} gives both.}
   \label{fig:decomp}
 \end{figure}
-
-Figure~\ref{fig:decomp} and Table~\ref{tab:split} give the result. For the
-outer-region Reynolds stresses, the majority of the apparent
-Reynolds-number trend is attributable to the residual $\beta$ mismatch:
-$64\%$ for $\overline{u_t^2}^+$ and $77\%$ for $\overline{u_tv_n}^+$. These
-are precisely the quantities on which the original argument leans most
-heavily. For the wall and integral quantities, and for TKE production,
-Reynolds number dominates at $65$--$73\%$ and the original reading stands.
 
 \begin{table}[t]
   \centering
   \small
   \caption{Share of the $\Rec = 2\times10^5 \to 10^6$ change attributable to
-  each cause, with robustness checks. Columns 3--5 repeat the
-  pressure-gradient share for a different pair of cases and for the memory
-  length forced off its fitted value.}
+  the pressure gradient, under both parameterisations of the non-local term.
+  The ordering is identical; only $\overline{u^2}^+$ crosses $50\%$ and must
+  therefore be quoted as a range.}
   \label{tab:split}
-  \begin{tabular}{lcc ccc}
+  \begin{tabular}{lccl}
     \toprule
-    & \multicolumn{2}{c}{attributed share} &
-      \multicolumn{3}{c}{PG share under perturbation} \\
-    \cmidrule(lr){2-3}\cmidrule(lr){4-6}
-    target & pressure gradient & Reynolds &
-    $4\!\times\!10^5\!\to\!10^6$ & $\ell\times0.5$ & $\ell\times2$ \\
+    target & kernel & $\Lambda$ & reading \\
     \midrule
-    $\overline{u_tv_n}^+$ & \textbf{77\%} & 23\%          & 73.5\% & 83.7\% & 80.2\% \\
-    $\overline{u_t^2}^+$  & \textbf{64\%} & 36\%          & 60.4\% & 61.1\% & 59.3\% \\
-    $U_e^+$               & 35\%          & \textbf{65\%} & 31.1\% & 33.3\% & 36.1\% \\
-    $C_f$                 & 35\%          & \textbf{65\%} & 31.1\% & 33.3\% & 36.1\% \\
-    $H$                   & 34\%          & \textbf{66\%} & 31.2\% & 34.3\% & 33.4\% \\
-    $P_k^+$               & 27\%          & \textbf{73\%} & 23.7\% & 24.7\% & 25.5\% \\
+    $\overline{uv}^+$     & 76.4\% & 91.6\% & pressure gradient dominates \\
+    $\overline{u^2}^+$    & 62.1\% & 46.9\% & comparable, parameterisation dependent \\
+    $C_f$                 & 34.8\% & 30.5\% & Reynolds number dominates \\
+    $U_e^+$               & 34.8\% & 30.5\% & Reynolds number dominates \\
+    $H$                   & 33.3\% & 25.9\% & Reynolds number dominates \\
+    $P_k^+$               & 25.9\% & 19.5\% & Reynolds number dominates \\
     \bottomrule
   \end{tabular}
 \end{table}
 
+Table~\ref{tab:split} gives the result. For the outer-region Reynolds shear
+stress, $76$--$92\%$ of the apparent Reynolds-number trend is attributable
+to the residual $\beta$ mismatch. For the wall and integral quantities and
+for TKE production, Reynolds number dominates at $70$--$80\%$ and the
+original reading stands. The streamwise fluctuation sits between the two,
+and the two parameterisations disagree on which side of $50\%$ it falls, so
+we quote it as $47$--$62\%$ and draw no conclusion from it.
+
 The split survives three checks. Changing the compared pair from
 $2\times10^5 \to 10^6$ to $4\times10^5 \to 10^6$ moves the shares by at most
-$3$ percentage points. Forcing $\ell$ to half or double its fitted value
-moves them by at most $7$ points, usually $1$--$3$, confirming that the
-$\ell$--$a_2$ trade-off cancels in the product. And the fitted law reproduces
-the observed change to within $2$--$10\%$ (Figure~\ref{fig:decomp}, left).
+$3$ percentage points. Forcing the kernel length to half or double its
+fitted value moves them by at most $7$ points. And the fitted law reproduces
+the observed change to within $2$--$10\%$.
 
-\section{Generalisation and functional form}
+\section{Generalisation}
 \label{sec:general}
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Median relative error (\%) for three tests of increasing
+  severity, using the $\Lambda$ form.}
+  \label{tab:general}
+  \begin{tabular}{lccc}
+    \toprule
+    target & hold out $\Rec=4\times10^5$ & extrapolate $\beta$ &
+    NACA4412 $\to$ NACA0012 \\
+    \midrule
+    $H$                & 0.57 &  2.99 &  2.54 \\
+    $C_f$              & 2.03 & 19.96 &  7.42 \\
+    $U_e^+$            & 1.01 &  8.70 &  3.93 \\
+    $\overline{u^2}^+$ & 4.72 & 20.96 &  9.81 \\
+    $\overline{uv}^+$  & 2.59 & 13.54 &  4.24 \\
+    $P_k^+$            & 5.11 & 34.98 & 17.72 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \begin{figure}[t]
   \centering
@@ -380,111 +402,84 @@ the observed change to within $2$--$10\%$ (Figure~\ref{fig:decomp}, left).
   \caption{\textbf{Left:} median relative error for the three tests.
   \textbf{Right:} the cross-geometry test, fitted on the NACA4412 at
   $5^\circ$ and evaluated on the NACA0012 at $0^\circ$, normalised by the
-  training geometric mean so that three quantities share one pair of axes.}
+  training geometric mean so three quantities share one pair of axes.}
   \label{fig:general}
 \end{figure}
 
-Table~\ref{tab:general} reports three tests of increasing severity.
-Interpolating in Reynolds number is easy ($0.6$--$5.1\%$). Extrapolating
-twenty-fold in $\beta$ (trained on $x/c \le 0.70$ where
-$\beta \le 2.5$, evaluated where $\beta$ reaches $49$) costs $20$--$35\%$
-on $C_f$, $\overline{u_t^2}^+$ and $P_k^+$; the law should be used within its
-calibration range. The cross-geometry test is the demanding one: fitted on a
-cambered section at $5^\circ$ and applied unchanged to a \emph{symmetric}
-section at $0^\circ$ whose pressure gradient reaches only $\beta = 3.3$, it
-returns $2.5$--$9.8\%$ median error on five of six quantities.
+Interpolating in Reynolds number is easy. Extrapolating twenty-fold in
+$\beta$, trained where $\beta \le 2.5$ and evaluated where it reaches
+$49$, costs $20$--$35\%$ on $C_f$, $\overline{u^2}^+$ and $P_k^+$, so the
+law should be used within its calibration range. Fitted on a cambered
+section at $5^\circ$ and applied unchanged to a symmetric section at
+$0^\circ$ whose pressure gradient reaches only $\beta = 3.3$, it returns
+$2.5$--$9.8\%$ on five of six quantities.
 
-A fourth test is impossible, and the reason is itself a result: the pressure
-side is a favourable pressure gradient with $\beta < 0$ at $88$--$95\%$ of
-stations in the window, and $\beta^{a_1}$ is not real there.
-Equation~\eqref{eq:law} is an adverse-pressure-gradient law and does not
-continue through $\beta = 0$; extending it would require a different form,
-not a refit.
+Transfer to the flat plates is a harder test again, and the honest result is
+that a wing-fitted law does not predict them accurately: errors range from
+$9\%$ on $H$ to $47\%$ on $\overline{u^2}^+$. The two flow classes occupy
+different parts of the $(\beta, \Lambda, \Ret)$ space, and the law is being
+asked to extrapolate in all three at once. What does transfer is the
+\emph{structure}: refitted on the flat plates, the same three terms give
+$0.9$--$4.8\%$ (Table~\ref{tab:thirdterm}), with $a_2$ correctly near zero.
 
-\begin{table}[t]
-  \centering
-  \small
-  \caption{Median relative error (\%) for the three generalisation tests.}
-  \label{tab:general}
-  \begin{tabular}{lccc}
-    \toprule
-    target & A: hold out $\Rec=4\times10^5$ & B: extrapolate $\beta$ &
-    C: NACA4412 $\to$ NACA0012 \\
-    \midrule
-    $H$                   & 0.57 &  2.99 &  2.54 \\
-    $C_f$                 & 2.03 & 19.96 &  7.42 \\
-    $U_e^+$               & 1.01 &  8.70 &  3.93 \\
-    $\overline{u_t^2}^+$  & 4.72 & 20.96 &  9.81 \\
-    $\overline{u_tv_n}^+$ & 2.59 & 13.54 &  4.24 \\
-    $P_k^+$               & 5.11 & 34.98 & 17.72 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+A fourth test is impossible, and the reason is a result: the pressure side
+of the wing is a favourable gradient with $\beta < 0$ at $88$--$95\%$ of
+stations, and $\beta^{a_1}$ is not real there. Equation~\eqref{eq:law} is an
+adverse-pressure-gradient law and does not continue through $\beta = 0$.
 
-\subsection{Is the three-term law the right complexity?}
+\subsection{Is three terms the right complexity?}
 
 We searched exhaustively over all 255 expressions of up to four terms drawn
-from a nine-term library: powers of the three variables, their pairwise
-products in log space, and quadratic curvature, at four memory lengths.
-Exhaustive rather than genetic search removes the seed, population size and
-stopping rule that would otherwise require justification, and is optimal
-within the space considered.
+from a nine-term library at four kernel lengths. Exhaustive rather than
+genetic search removes the seed, population size and stopping rule that
+would otherwise require justification.
 
-Two findings. First, \textbf{the interaction $\log\beta \cdot
-\log(\bbar/\beta)$ is selected for all six targets}, out of nine candidate
-terms in six independent selections. Its presence means the exponent on
-$\beta$ depends on how far the upstream history departs from the local
-value: history and local pressure gradient \emph{multiply} rather than
-acting as the separable factors that Equation~\eqref{eq:law} assumes. The
-next most frequent terms are $\log^2\beta$ ($5/6$, curvature in $\beta$) and
-$\log\beta\cdot\log\Ret$ ($4/6$, a Reynolds-dependent exponent on $\beta$).
-
-Second, and cautionary, \textbf{selection optimism is a factor of $4.4$
-(median, range $3.2$--$5.9$)}. The leave-one-Reynolds-number-out error used
+Two findings, one encouraging and one cautionary. The interaction between
+the local pressure gradient and the non-local term is selected for all six
+targets under the kernel parameterisation, and improves four of six under
+the $\Lambda$ form; the exponent on $\beta$ therefore appears to depend on
+how far the layer is from equilibrium. But \textbf{selection optimism is a
+factor of $4.4$} (median, range $3.2$--$5.9$): the leave-one-out error used
 to choose among roughly a thousand candidates understates true held-out
-error by that much. Evaluated honestly on the NACA0012, which took no part
-in selection, the searched four-term expressions beat the three-term power
-law on only four of six targets. The Pareto front also shows a clear elbow
-at three terms: the first three buy an order of magnitude in accuracy, the
-fourth buys little. We therefore retain Equation~\eqref{eq:law} as the
-working law and report the interaction as the indicated direction for a
-richer form, rather than adopting the searched expressions wholesale.
+error by that much, and evaluated on the unseen NACA0012 the searched
+four-term expressions beat the three-term law on only four of six targets.
+The Pareto front shows a clear elbow at three terms. We therefore retain
+Equation~\eqref{eq:law} and report the interaction as an indicated direction
+rather than adopting it.
 
 \section{Discussion}
 
 The decomposition splits the original finding in two. For the wall and
 integral quantities and for TKE production, Reynolds number accounts for
-$65$--$73\%$ of the difference between cases, and the conclusion of
-\citet{vinuesa2018} is supported. For the outer-region Reynolds stresses it
-accounts for only $23$--$36\%$, and the majority of the measured trend is
-residual pressure-gradient sensitivity rather than a Reynolds-number effect.
-Since the outer region is where the two proposed energising mechanisms were
-argued to differ, this is the part of the argument most in need of the
-larger database.
+$70$--$80\%$ of the difference between cases and the conclusion of
+\citet{vinuesa2018} is supported. For the outer-region shear stress it
+accounts for $8$--$24\%$, and the measured trend is predominantly residual
+pressure-gradient sensitivity. Since the outer region is where the proposed
+energising mechanisms were argued to differ, this is the part of the
+argument most in need of a larger database.
 
-That the fitted memory length is short, $\ell \approx 0.5\,\dnn$, and
-similar for inner and outer quantities deserves comment, since Clauser's
-long-memory observation might predict otherwise. We initially obtained an
-order-of-magnitude separation between wall and outer quantities by scanning
-$\ell$ against held-out error; it did not survive selecting $\ell$ inside
-the training fold with a non-collinear parameterisation. We report the
-corrected result. Note that a short kernel is not the same as a weak
-history effect: removing the history term entirely degrades the fit by a
-factor of $10$--$24$, and the effect it captures is of order the local
-boundary-layer thickness, which itself grows by an order of magnitude along
-the chord.
+The non-local term should be understood as a non-equilibrium correction
+rather than a memory. Three observations support this. A memory length
+cannot be resolved on 50 chordwise stations, so the wing data could never
+have measured one. Where it can be resolved, on 1570-station flat plates,
+the fit prefers the shortest kernel available. And replacing the kernel by
+the purely local $\Lambda$ of Equation~\eqref{eq:lambda} changes nothing
+material. This does not contradict \citet{clauser1956} or
+\citet{bobke2017}, whose history effects are real; it says that on these
+particular databases the measurable signal is the local rate of change of
+$\beta$, and that distinguishing a genuine memory from it would need
+streamwise resolution the wing database does not have.
 
-\paragraph{Limitations.} The analysis rests on three Reynolds numbers of a
-single section plus one cross-geometry case, so case-level statistics are
+\paragraph{Limitations.} The wing analysis rests on three Reynolds numbers
+of one section plus one cross-geometry case, so case-level statistics are
 weak and we report case-level rather than station-level generalisation
-throughout. The law has no favourable-pressure-gradient limit. The memory
-length is identifiable only to a factor of order $1.3$. And $\beta$ is taken
-as distributed rather than recomputed, since the 50 stored stations
-under-resolve the pressure gradient. The natural next step is the database
-of \citet{mallor2024}, which spans three Reynolds numbers and four angles
-of attack: varying incidence changes $\beta(x)$ while holding the geometry
-fixed, which is precisely the lever needed to separate history from local
-magnitude with more than one pressure-gradient history per geometry.
+throughout. The law has no favourable-pressure-gradient limit, and does not
+transfer quantitatively between flow classes. $\beta$ is taken as
+distributed rather than recomputed. The natural next step is the database of
+\citet{mallor2024}, spanning three Reynolds numbers and four angles of
+attack: varying incidence changes $\beta(x)$ while holding geometry fixed,
+which would give several pressure-gradient histories per geometry rather
+than one.
 
 \section{Conclusions}
 
@@ -493,29 +488,28 @@ magnitude with more than one pressure-gradient history per geometry.
         comparison in \citet{vinuesa2018} holds only to tens of percent, and
         the residual is monotone in Reynolds number, so it is confounded
         with the effect being measured.
-  \item A three-term power law with a fitted memory length predicts a
-        held-out Reynolds number to $1.2$--$9.2\%$ and, being linear in
-        logarithms, splits the difference between cases exactly.
-  \item For the outer-region Reynolds stresses, $64$--$77\%$ of the apparent
-        Reynolds-number trend is attributable to the residual $\beta$
-        mismatch; for wall and integral quantities and TKE production,
-        Reynolds number dominates.
-  \item The law transfers from a cambered section at $5^\circ$ to a
-        symmetric section at $0^\circ$ with $2.5$--$9.8\%$ median error on
-        five of six quantities, but does not extrapolate far in $\beta$ and
-        has no favourable-gradient limit.
-  \item An exhaustive symbolic search selects the interaction between local
-        $\beta$ and the memory ratio for every target, indicating that
-        history and local pressure gradient multiply rather than acting
-        separably.
+  \item A memory length is not resolvable on 50 chordwise stations: a kernel
+        of $0.5\,\dnn$ spans less than half the station spacing. The
+        measurable non-local signal is the local non-equilibrium parameter
+        $\Lambda = (\dnn/\beta)\,\mathrm{d}\beta/\mathrm{d}x_t$.
+  \item A three-term law in $\beta$, $\Lambda$ and $\Ret$ predicts a
+        held-out Reynolds number to $1.0$--$7.7\%$ and splits the difference
+        between cases exactly.
+  \item For the outer-region Reynolds shear stress, $76$--$92\%$ of the
+        apparent Reynolds-number trend is attributable to the residual
+        $\beta$ mismatch; for wall and integral quantities and TKE
+        production, Reynolds number dominates at $70$--$80\%$.
+  \item $\Lambda$ removes $73$--$90\%$ of the error on the wing and nothing
+        on five near-equilibrium flat-plate layers, which is the behaviour a
+        non-equilibrium correction should show.
 \end{enumerate}
 
 \section*{Data and code availability}
 
-The WING database is the property of its authors; the download links
-currently published are not operational, and the files used here were
+The WING and APG databases are the property of their authors; the download
+links currently published are not operational, and the files used here were
 supplied on request. All analysis code, the reproduction of
-\citet{vinuesa2018}, a documented audit of the database, and the scripts
+\citet{vinuesa2018}, a documented audit of both databases, and the scripts
 generating every figure and table in this paper are available at
 \begin{center}
 \footnotesize
@@ -524,7 +518,7 @@ generating every figure and table in this paper are available at
 
 \section*{Acknowledgements}
 
-We thank R.\ Vinuesa for providing the database.
+We thank R. Vinuesa for providing both databases.
 
 \begin{thebibliography}{9}
 \small

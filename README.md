@@ -17,7 +17,8 @@ and 1M (5° angle of attack), plus a NACA0012 at `Re_c` = 400k.
 | 1. Baselines, memory kernel, leakage-safe validation | **done** |
 | 2. Fitted memory length + exact decomposition into β / history / Re | **done** |
 | 3. Cross-geometry generalisation + symbolic search | **done** |
-| 4. Write-up; more cases if the Mallor (2024) database becomes available | next |
+| 4. Flat-plate test; the memory claim corrected | **done** |
+| 5. Submission; more cases if the Mallor (2024) database arrives | next |
 
 ## Phase 0 result: the published results come back out of the published files
 
@@ -203,95 +204,18 @@ python scripts/phase2_decomposition.py
 
 Full tables: [`paper/phase2_results.md`](paper/phase2_results.md).
 
-### A limitation worth stating plainly
+### Correction: the memory length was never resolved
 
-The memory length ℓ and the history exponent a₂ **trade off against each
-other**: a shorter memory shrinks log(β̄/β), and a larger |a₂| compensates
-almost exactly. On synthetic data the fitter recovers both to four
-significant figures with no noise, but 0.2% noise in log space — far below
-the scatter in the LES statistics — moves ℓ by 15–27% and a₂ by up to 65%.
+Phase 4 (below) showed that a memory length of 0.5 δ₉₉ is **0.47 station
+spacings** on the wing grid. The kernel decays inside a single quadrature
+panel, so what it measured was the local rate of change of β, not a memory.
+The ℓ values in the table above are properties of the grid, not of the flow,
+and the project now uses the resolved local parameter
 
-So ℓ ≈ 0.5δ₉₉ is good to a factor of roughly 1.3, not to two digits, and is
-reported that way. The decomposition is built from the *product* a₂·log(β̄/β),
-in which the trade-off cancels — which is why the split above is stable while
-its ingredients individually are not. Both facts are pinned in
-[`tests/test_memory_model.py`](tests/test_memory_model.py).
+> **Λ = (δ₉₉ / β) · dβ/dx**
 
-## Phase 3 result: it transfers to another airfoil, and history multiplies with β
-
-![Generalisation](paper/figures/fig_generalisation.png)
-
-Every earlier conclusion rested on three Reynolds numbers of one wing. Three
-tests, in increasing order of what they ask:
-
-| target | A: hold out Re_c=400k | B: extrapolate β, 2.5 → 49 | **C: NACA4412 → NACA0012** |
-|---|---|---|---|
-| `H` | 0.57% | 2.99% | **2.54%** |
-| `Cf` | 2.03% | 19.96% | **7.42%** |
-| `Ue_plus` | 1.01% | 8.70% | **3.93%** |
-| `uu_outer` | 4.72% | 20.96% | **9.81%** |
-| `uv_outer` | 2.59% | 13.54% | **4.24%** |
-| `Pk_outer` | 5.11% | 34.98% | **17.72%** |
-
-Test **C** is the real one: fitted on a cambered section at 5° with β
-reaching 46, then asked about a *symmetric* section at 0° where β only
-reaches 3.3. Nothing about that geometry is in the training distribution
-except the physics the law is meant to have captured, and most quantities
-come back within 2.5–10%.
-
-Test **B** is the honest limitation: extrapolating the power law twenty-fold
-beyond its fitted β range costs 20–35% on `Cf`, `uu` and `Pk`. The law
-should be used inside its calibration range.
-
-**A fourth test is impossible, and the reason is a result.** The pressure
-side is a *favourable* gradient with β < 0 at 88–95% of stations, and a law
-containing β^a has no real value there. This is an adverse-pressure-gradient
-law; it does not continue through β = 0.
-
-### Does a richer expression beat the power law?
-
-![Pareto front](paper/figures/fig_pareto.png)
-
-An exhaustive search over all 255 expressions of up to four terms from a
-nine-term library, at four memory lengths — exhaustive rather than genetic,
-so there is no seed, population size or stopping rule to defend, and the
-result is optimal within the space.
-
-Two findings, one encouraging and one cautionary.
-
-**One term is chosen for every single target: `log β · log m`.** Out of nine
-candidates and six independent selections. Its meaning is that the exponent
-on β depends on how far the upstream history departs from the local value —
-**history and local pressure gradient are not separable factors, they
-multiply**. The Phase 2 law treats them as independent, which is why a fourth
-term helps. Runners-up are `log²β` (5/6, curvature in β) and `log β · log R`
-(4/6, a Reynolds-dependent β exponent).
-
-**Selection optimism is 4.4× median.** The leave-one-Re-out error used to
-pick an expression understates its true held-out error by a factor of 3–6.
-Scored honestly on the NACA0012, the searched four-term expressions beat the
-three-term power law on only 4 of 6 targets:
-
-| target | searched, selection | searched, NACA0012 | power law, NACA0012 |
-|---|---|---|---|
-| `H` | 0.31% | **1.77%** | 2.18% |
-| `Cf` | 0.97% | **4.24%** | 7.92% |
-| `Ue_plus` | 0.49% | **2.19%** | 4.21% |
-| `uv_outer` | 1.50% | **0.86%** | 4.26% |
-| `uu_outer` | 3.44% | 11.09% | **9.74%** |
-| `Pk_outer` | 3.67% | 21.77% | **18.47%** |
-
-Anyone running symbolic regression on a turbulence dataset this size should
-expect that gap. The Pareto curves also show a clear elbow at three terms:
-the first three buy an order of magnitude, the fourth buys very little.
-
-```bash
-python scripts/phase3_generalisation.py
-python scripts/phase3_symbolic.py
-```
-
-Full tables: [`paper/phase3_generalisation.md`](paper/phase3_generalisation.md),
-[`paper/phase3_symbolic.md`](paper/phase3_symbolic.md).
+in their place. Substituting Λ for the kernel changes wing accuracy by less
+than the spread between quantities, confirming the two are the same feature.
 
 ### A methodological note worth repeating
 
@@ -371,3 +295,55 @@ paper/          figures and the reproduction report
 
 MIT for the code. The WING database is the property of its authors and is
 not redistributed here; cite references 1 and 2 when using it.
+
+
+## Phase 4 result: the term measures distance from equilibrium
+
+![Flat plates](paper/figures/fig_apg.png)
+
+Added the APG flat-plate database of Bobke et al. (2017), supplied on
+request: five deliberately different pressure-gradient histories — two at
+nominally constant β, three following a power-law freestream — with **1570
+streamwise stations per case** against the wing's 50.
+
+**A third trap in the data.** APG builds every shipped quantity on its `Ue`
+field. WING builds them on `max(U)`. Same group, same file format, opposite
+conventions, verified to six decimals across all cases.
+
+**The non-local term earns its place only off equilibrium:**
+
+| target | wing, local only | wing, with Λ | flat plate, local only | flat plate, with Λ |
+|---|---|---|---|---|
+| `H` | 3.67% | **1.00%** | 0.96% | 0.93% |
+| `Cf` | 26.37% | **3.93%** | 3.44% | 3.69% |
+| `Ue_plus` | 16.40% | **1.95%** | 1.67% | 1.80% |
+| `uu_outer` | 30.98% | **6.32%** | 5.04% | 4.82% |
+| `uv_outer` | 20.68% | **3.09%** | 3.68% | 2.92% |
+| `Pk_outer` | 41.88% | **7.74%** | 4.10% | 4.02% |
+
+On the wing it removes 73–90% of the error. On the flat plates it removes
+nothing, and for `Cf` and `Ue_plus` it is slightly harmful.
+
+That is the right behaviour, and it is the strongest evidence the term means
+what it claims. The wing's β climbs from 0.3 to 46 across the window, so it
+is far from equilibrium. The flat plates were *built* to sit near
+equilibrium and their β is nearly flat, so Λ ≈ 0 and the term correctly
+reports that nothing is missing. A term that improved both would be suspect.
+
+**What this does to the headline.** The ordering is unchanged under both
+parameterisations, but one number loosens:
+
+| target | kernel | Λ | reading |
+|---|---|---|---|
+| `uv_outer` | 76.4% | 91.6% | pressure gradient dominates |
+| `uu_outer` | 62.1% | 46.9% | **comparable — quote as a range** |
+| `Cf`, `Ue_plus` | 34.8% | 30.5% | Reynolds number dominates |
+| `H` | 33.3% | 25.9% | Reynolds number dominates |
+| `Pk_outer` | 25.9% | 19.5% | Reynolds number dominates |
+
+```bash
+python scripts/phase4_apg.py
+```
+
+Full tables: [`paper/phase4_results.md`](paper/phase4_results.md), and
+[`docs/DATA_NOTES.md`](docs/DATA_NOTES.md) section 10.
