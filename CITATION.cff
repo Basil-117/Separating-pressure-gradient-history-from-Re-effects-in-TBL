@@ -5,6 +5,7 @@ type: software
 authors:
   - family-names: "Mehmood"
     given-names: "Basil"
+    email: "basilmehmood117@gmail.com"
 license: MIT
 repository-code: "https://github.com/Basil-117/Separating-pressure-gradient-history-from-Re-effects-in-TBL"
 references:
