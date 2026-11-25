@@ -174,9 +174,9 @@ pip install -e ".[dev]"
 ## Data
 
 Neither database is redistributed here. The download links published on
-`vinuesalab.com` point at a personal KTH OneDrive account that is no longer
-served; both files were supplied on request by R. Vinuesa, whom I thank.
-Place `naca4412.mat`, `naca0012.mat` and `apg.mat` in `data/raw/`.
+`vinuesalab.com` no longer resolve; both files were supplied by the authors
+on request. Place `naca4412.mat`, `naca0012.mat` and `apg.mat` in
+`data/raw/`.
 
 ```python
 from wingtbl.loader import load_wing
@@ -199,12 +199,13 @@ wingtbl/        loaders for both databases, BL quantities, model, validation
 scripts/        reproduction, audit, model fitting, figures
 tests/          64 tests, including regression against the published values
 docs/           DATA_NOTES.md, the provenance audit
-paper/          figures, generated tables, and an unpublished draft
+paper/          figures and generated tables
 ```
 
-`paper/wing_memory.tex` is a draft that was **not** submitted; its framing
-overstates novelty for the reasons in [relation to prior
-work](#relation-to-prior-work). It is kept for the figures and the record.
+An earlier version of this work was written up as a draft paper. It was not
+submitted, and it is not kept here: its framing overstated novelty for the
+reasons in [relation to prior work](#relation-to-prior-work). The figures
+and the generated tables it drew on are in `paper/`.
 
 ## References
 
@@ -236,9 +237,8 @@ work](#relation-to-prior-work). It is kept for the figures and the record.
 
 ## Acknowledgements
 
-R. Vinuesa supplied both databases and reviewed an early draft in detail.
-The corrections in sections 4 and 5, and the relation-to-prior-work section,
-follow directly from that review.
+I thank R. Vinuesa for supplying both databases on request, and for his
+comments on this work.
 
 ## Licence
 

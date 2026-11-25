@@ -157,9 +157,9 @@ wall-normal frame with the tensors rotated accordingly.
 
 ## 7. Obtaining the data
 
-The download links on `vinuesalab.com/wing/` point at a personal KTH OneDrive
-account that is no longer served. The files used here were supplied directly
-by the author on request (November 2026). Contact rvinuesa@umich.edu.
+The download links published on `vinuesalab.com/wing/` no longer resolve. The
+files used here were supplied by the authors on request (November 2026);
+current contact details are on the group's own pages.
 
 Files, after extraction:
 

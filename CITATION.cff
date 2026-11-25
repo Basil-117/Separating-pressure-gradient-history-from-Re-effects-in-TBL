@@ -1,11 +1,12 @@
 cff-version: 1.2.0
-title: "wing-memory: history-aware modelling of wing turbulent boundary layers"
-message: "If you use this software, please cite it and the underlying WING database."
+title: "wing-memory: a reproduction and methods audit of pressure-gradient turbulent boundary-layer databases"
+message: "If you use this software, please cite it and the underlying databases."
 type: software
 authors:
   - family-names: "Mehmood"
     given-names: "Basil"
     email: "basilmehmood117@gmail.com"
+    orcid: "https://orcid.org/0009-0006-9315-8668"
 license: MIT
 repository-code: "https://github.com/Basil-117/Separating-pressure-gradient-history-from-Re-effects-in-TBL"
 references:
