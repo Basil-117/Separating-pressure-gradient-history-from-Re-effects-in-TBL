@@ -193,7 +193,11 @@ def main() -> None:
     lines = ["# Phase 1 baselines\n",
              f"Median absolute relative error (%), median across folds. "
              f"Memory length {args.memory:g} x delta99. "
-             f"W1 excluded (not a well-behaved TBL).\n"]
+             f"W1 excluded (not a well-behaved TBL).\n",
+             "> **Read with the limits in the README.** The `+history` columns use a",
+             "> kernel that is unresolvable on the 50-station wing grid, and the model",
+             "> comparison is scored on the same held-out folds used to select it. See",
+             "> *Identifiability* in the README."]
     for scheme in ("leave-one-Re-out", "blocked streamwise"):
         tbl = pivot(res, scheme)
         print(f"=== {scheme} ===")

@@ -245,6 +245,12 @@ def main() -> None:
     dec.to_csv(out / "phase2_decomposition.csv", index=False)
     (out / "phase2_results.md").write_text(
         "# Phase 2: fitted memory and the Re / pressure-gradient split\n\n"
+        "> **Read with the limits in the README.** The pressure-gradient / Reynolds\n"
+        "> split below is **withdrawn**. The design matrix conditions at 18-57, so\n"
+        "> the coefficient split is not identified, and the pressure-gradient share\n"
+        "> pools the `beta` and `Lambda` terms rather than isolating the `beta`\n"
+        "> mismatch. The fitted lengths are also below the station spacing. Kept as\n"
+        "> the record of what was computed. See *Identifiability* in the README.\n"
         "## Held-out accuracy, memory length refitted inside each fold\n\n"
         + summary.round(3).to_markdown() +
         "\n\n`ell` is in multiples of the local `delta99`; `err_%` is the median\n"

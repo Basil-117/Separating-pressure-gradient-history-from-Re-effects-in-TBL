@@ -1,5 +1,11 @@
 # Phase 2: fitted memory and the Re / pressure-gradient split
 
+> **Read with the limits in the README.** The pressure-gradient / Reynolds
+> split below is **withdrawn**. The design matrix conditions at 18-57, so
+> the coefficient split is not identified, and the pressure-gradient share
+> pools the `beta` and `Lambda` terms rather than isolating the `beta`
+> mismatch. The fitted lengths are also below the station spacing. Kept as
+> the record of what was computed. See *Identifiability* in the README.
 ## Held-out accuracy, memory length refitted inside each fold
 
 | target   |   ell_median |   ell_min |   ell_max |   a_beta |   a_hist |   a_Re |   err_% |

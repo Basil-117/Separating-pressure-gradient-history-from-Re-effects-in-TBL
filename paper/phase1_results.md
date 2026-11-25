@@ -2,6 +2,10 @@
 
 Median absolute relative error (%), median across folds. Memory length 20 x delta99. W1 excluded (not a well-behaved TBL).
 
+> **Read with the limits in the README.** The `+history` columns use a
+> kernel that is unresolvable on the 50-station wing grid, and the model
+> comparison is scored on the same held-out folds used to select it. See
+> *Identifiability* in the README.
 
 ## leave-one-Re-out
 

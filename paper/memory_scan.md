@@ -1,5 +1,10 @@
 # Memory-length scan
 
+> **Read with the limits in the README.** The fitted memory lengths below
+> are near or under one station spacing on the 50-station wing grid, where
+> the kernel decays inside a single quadrature panel and cannot be
+> resolved. They are a property of the grid, not a physical length. See
+> *Identifiability* in the README.
 Leave-one-Reynolds-number-out median relative error, as a function of
 the kernel memory length in units of the local `delta99`.
 

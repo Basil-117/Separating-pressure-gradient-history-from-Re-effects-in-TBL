@@ -201,6 +201,11 @@ def main() -> None:
     scan.to_csv(out / "memory_scan.csv", index=False)
     (out / "memory_scan.md").write_text(
         "# Memory-length scan\n\n"
+        "> **Read with the limits in the README.** The fitted memory lengths below\n"
+        "> are near or under one station spacing on the 50-station wing grid, where\n"
+        "> the kernel decays inside a single quadrature panel and cannot be\n"
+        "> resolved. They are a property of the grid, not a physical length. See\n"
+        "> *Identifiability* in the README.\n"
         "Leave-one-Reynolds-number-out median relative error, as a function of\n"
         "the kernel memory length in units of the local `delta99`.\n\n"
         "## Best length per target\n\n" + best.round(3).to_markdown() +
